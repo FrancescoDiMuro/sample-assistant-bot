@@ -1,5 +1,5 @@
 from dotenv import load_dotenv
-from handlers.command.start import start
+from handlers.conversation.start import start_handler
 from os import getenv
 from telegram import Update
 from telegram.constants import ParseMode
@@ -20,7 +20,6 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .defaults(defaults=defaults) \
         .build()
     
-    start_handler = CommandHandler(command="start", callback=start)
     app.add_handler(handler=start_handler)
     
 # Run bot polling, allowing all the updates to be processed
