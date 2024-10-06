@@ -1,8 +1,11 @@
+from dotenv import load_dotenv
 from models.base.base import Base
 from os import getenv
 from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import sessionmaker
 
+# Load environment variables from local .env
+load_dotenv()
 
 # Get the specified .env variables
 DB_DIALECT: str = getenv("DB_DIALECT")
