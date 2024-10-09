@@ -1,6 +1,7 @@
 from datetime import datetime, UTC
 from models.base.base import Base
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+from sqlalchemy.ext.hybrid import hybrid_property
 from uuid import UUID, uuid4
 
 
@@ -22,5 +23,13 @@ class User(Base):
     # These are the relationships between other models
     # Thanks to these variables, we can access the specified models
     # through this (User) model
-    location = relationship("Location", back_populates="user")
+    location = relationship("Location", back_populates="user", lazy="joined")
     reminders = relationship("Reminder", back_populates="user")
+
+
+    @hybrid_property
+    def has_location(self):
+
+        return len(self.location) > 0
+
+
