@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from handlers.conversation.start import start_handler
+from handlers.post_init.post_init import post_init
 from os import getenv
 from telegram import Update
 from telegram.constants import ParseMode
@@ -18,6 +19,7 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
     # Create the app
     app = ApplicationBuilder() \
         .token(BOT_TOKEN) \
+        .post_init(post_init=post_init) \
         .defaults(defaults=defaults) \
         .build()
     
