@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+from handlers.command.weather import weather_handler
 from handlers.conversation.start import start_handler
 from handlers.post_init.post_init import post_init
 from os import getenv
@@ -24,6 +25,9 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .build()
     
     app.add_handler(handler=start_handler)
+
+    # ---------- weather (command) ---------- 
+    app.add_handler(handler=weather_handler)
     
     # Run bot polling, allowing all the updates to be processed
     app.run_polling(allowed_updates=Update.ALL_TYPES)
