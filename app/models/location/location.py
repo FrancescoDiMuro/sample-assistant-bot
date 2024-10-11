@@ -22,4 +22,4 @@ class Location(Base):
     # These are the relationships between other models
     # Thanks to these variables, we can access the specified models
     # through this (Location) model
-    user = relationship("User", back_populates="location")
+    user = relationship("User", back_populates="location", uselist=False)
