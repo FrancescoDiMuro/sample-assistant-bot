@@ -35,10 +35,8 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         # Check if the user has already a location
         if location := user.location:
 
-            location_id = location[0].id
-
             # Save the location id in the context user data dictionary
-            context.user_data["location_id"] = location_id
+            context.user_data["location_id"] = location.id
 
             user_text = (
                 f"{Emoji.ROUND_PUSHPIN} You've already set your location.\n"
