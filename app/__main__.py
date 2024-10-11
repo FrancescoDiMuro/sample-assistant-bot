@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 from handlers.conversation.start import start_handler
+from handlers.conversation.set_location import set_location_handler
 from handlers.post_init.post_init import post_init
 from os import getenv
 from telegram import Update
@@ -23,7 +24,11 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .defaults(defaults=defaults) \
         .build()
     
+    # ---------- /start (conversation) ----------
     app.add_handler(handler=start_handler)
+
+    # ---------- /setlocation (conversation) ----------
+    app.add_handler(handler=set_location_handler)
     
     # Run bot polling, allowing all the updates to be processed
     app.run_polling(allowed_updates=Update.ALL_TYPES)

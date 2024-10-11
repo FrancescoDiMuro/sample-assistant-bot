@@ -23,7 +23,7 @@ class User(Base):
     # These are the relationships between other models
     # Thanks to these variables, we can access the specified models
     # through this (User) model
-    location = relationship("Location", back_populates="user", lazy="joined")
+    location = relationship("Location", back_populates="user", lazy="joined", uselist=False)
     reminders = relationship("Reminder", back_populates="user")
 
 
