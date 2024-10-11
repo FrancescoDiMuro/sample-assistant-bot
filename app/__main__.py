@@ -26,7 +26,7 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
     
     app.add_handler(handler=start_handler)
 
-    # ---------- weather (command) ---------- 
+    # ---------- /weather (command) ---------- 
     app.add_handler(handler=weather_handler)
     
     # Run bot polling, allowing all the updates to be processed
