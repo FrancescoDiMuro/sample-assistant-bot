@@ -5,7 +5,7 @@ from handlers.post_init.post_init import post_init
 from os import getenv
 from telegram import Update
 from telegram.constants import ParseMode
-from telegram.ext import ApplicationBuilder, CommandHandler, Defaults
+from telegram.ext import ApplicationBuilder, Defaults
 
 
 # Load environment variables from local .env

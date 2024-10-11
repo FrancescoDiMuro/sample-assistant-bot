@@ -1,7 +1,6 @@
 from __future__ import annotations
 from constants.emoji import Emoji
 from constants.wmo_codes import WMO_CODES
-from datetime import datetime
 from models.user.crud.retrieve import retrieve_user
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler

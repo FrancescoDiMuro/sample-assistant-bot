@@ -1,5 +1,5 @@
 from constants.bot_commands import BOT_COMMANDS
-from telegram import BotCommand, MenuButton
+from telegram import BotCommand
 from telegram.ext import Application
 
 
