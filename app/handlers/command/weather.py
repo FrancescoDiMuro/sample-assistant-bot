@@ -1,12 +1,10 @@
 from __future__ import annotations
 from constants.emoji import Emoji
+from constants.wmo_codes import WMO_CODES
 from datetime import datetime
 from models.user.crud.retrieve import retrieve_user
 from telegram import Update
-from telegram.ext import (
-    ContextTypes, 
-    CommandHandler,
-)
+from telegram.ext import ContextTypes, CommandHandler
 
 import requests
 
@@ -46,13 +44,23 @@ async def get_weather_info_job(context: ContextTypes.DEFAULT_TYPE) -> None:
     # Extract the information from the "get_weather_info" function
     weather_info: dict = await get_weather_info(location_data=location_data)
 
-    # Format user info
-    # TODO
-    
-    # User text
-    user_text = "\n".join(
-        [f"{k} = {v}" for k,v in weather_info.items()]
-    )
+    # If data has been gathered correctly
+    if weather_info:
+
+        # Format user info
+        formatted_weather_info: dict = await format_weather_info(response_body=weather_info)
+
+        # User text
+        user_text = "\n".join(
+            [f"{k}: {v}" for k,v in formatted_weather_info.items()]
+        )
+
+    else:
+        
+        user_text = (
+            f"{Emoji.CROSS_MARK} Unable to retrieve weather information at the moment.\n"
+            "Try again later."
+        )    
 
     # Send the message
     await context.bot.send_message(
@@ -61,7 +69,7 @@ async def get_weather_info_job(context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
 
-async def get_weather_info(location_data: dict):
+async def get_weather_info(location_data: dict) -> dict | None:
 
     # Base URL for the Open-Meteo APIs
     base_url: str = "https://api.open-meteo.com/v1"
@@ -72,45 +80,24 @@ async def get_weather_info(location_data: dict):
     # List of variables with the desired display name
     # and the actual name
     variables: list = [
-        {
-            "display_name": "Temperature",
-            "variable_name": "temperature_2m"
-        },
-        {
-            "display_name": "Relative Humidity",
-            "variable_name": "relative_humidity_2m"
-        },
-        {
-            "display_name": "Feels like",
-            "variable_name": "apparent_temperature"
-        },
-        {
-            "display_name": "Day/Night",
-            "variable_name": "is_day"
-        },
-        {
-            "display_name": "Cloud Cover",
-            "variable_name": "cloud_cover"
-        },
-        {
-            "display_name": "Wind Speed",
-            "variable_name": "wind_speed_10m"
-        }
+        "weather_code",
+        "temperature_2m",
+        "relative_humidity_2m",
+        "apparent_temperature",
+        "is_day",
+        "cloud_cover",
+        "wind_speed_10m"
     ]
 
     # Format query parameters
     query_parameters: dict = {
         "latitude": location_data.get("latitude"),
         "longitude": location_data.get("longitude"),
-        "current": ",".join([d["variable_name"] for d in variables])
+        "current": ",".join([variable for variable in variables])
     }
 
     # Compose the URL
     url = f"{base_url}/{endpoint}"
-    
-    # Dictionary to save the weather info extraced
-    # from the API call response
-    weather_info = {}
 
     # Call the APIs
     response = requests.get(url=url, params=query_parameters)
@@ -121,26 +108,92 @@ async def get_weather_info(location_data: dict):
         # Get the response body in JSON format
         response_body: dict = response.json()
 
-        # Get the current values and current units for the selected variables
-        current_values: dict = response_body.get("current")
-        current_units: dict = response_body.get("current_units")  
+        return response_body
+    
+    return None
 
-        # For every dictionary in the variables list
-        for d in variables:
 
-            # Get the display name and the variable name
-            display_name = d.get("display_name")
-            variable_name = d.get("variable_name")
+async def format_weather_info(response_body: dict) -> dict:
+    
+    # List of variables with the desired display name
+    # and the actual name
+    variables: list = [
+        {
+            "display_name": "Summary",
+            "variable_name": "weather_code",
+            "emoji": Emoji.OPEN_BOOK,
+        },
+        {
+            "display_name": "Temperature",
+            "variable_name": "temperature_2m",
+            "emoji": Emoji.THERMOMETER
+        },
+        {
+            "display_name": "Relative Humidity",
+            "variable_name": "relative_humidity_2m",
+            "emoji": Emoji.SPLASHING_SWEAT_SYMBOL
+        },
+        {
+            "display_name": "Feels like",
+            "variable_name": "apparent_temperature",
+            "emoji": Emoji.FACE_MASSAGE
+        },
+        {
+            "display_name": "Day/Night",
+            "variable_name": "is_day",
+            "emoji": "",
+        },
+        {
+            "display_name": "Cloud Cover",
+            "variable_name": "cloud_cover",
+            "emoji": Emoji.CLOUD
+        },
+        {
+            "display_name": "Wind Speed",
+            "variable_name": "wind_speed_10m",
+            "emoji": Emoji.WIND_FACE
+        }
+    ]
 
-            # Get the variable value and the variable unit
-            variable_value = current_values.get(variable_name)
-            variable_unit = current_units.get(variable_name)
+    # Dictionary to save the weather info extraced
+    # from the API call response
+    weather_info = {}
 
-            # Save the information in the weather info dictionary
-            weather_info[display_name] = f"{variable_value} {variable_unit}"
+    # Get the current values and current units for the selected variables
+    current_values: dict = response_body.get("current")
+    current_units: dict = response_body.get("current_units")
 
-    # Ok    => {filled dictionary}
-    # Error => {}
+    # For every dictionary in the variables list
+    for d in variables:
+
+        # Get the display name and the variable name
+        display_name = d.get("display_name")
+        variable_name = d.get("variable_name")
+        variable_emoji = d.get("emoji")
+
+        # Get the variable value and the variable unit
+        variable_value = current_values.get(variable_name)
+        variable_unit = current_units.get(variable_name)
+
+        # Tuning variable values
+        if variable_name == "is_day":
+            current_variable_value = variable_value
+            variable_value = "Day" if current_variable_value == 1 else "Night"
+            variable_emoji = Emoji.BLACK_SUN_WITH_RAYS if current_variable_value == 1 \
+                else Emoji.NEW_MOON_SYMBOL 
+
+        # Get the detailed info about weather code
+        # and reset variable unit
+        if variable_name == "weather_code":
+            variable_value = WMO_CODES[variable_value]
+            variable_unit = ""
+
+        # Create the key for the dictionary
+        key = f"{variable_emoji} {display_name}"
+
+        # Save the information in the weather info dictionary
+        weather_info[key] = f"{variable_value} {variable_unit}"
+
     return weather_info
 
 
