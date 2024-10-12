@@ -58,8 +58,8 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
         # Set the keyboard buttons
         keyboard = [
-            [KeyboardButton(text=f"Yes")],
-            [KeyboardButton(text=f"No")]
+            [KeyboardButton(text="Yes")],
+            [KeyboardButton(text="No")]
         ]
         
         # Create the keyboard
