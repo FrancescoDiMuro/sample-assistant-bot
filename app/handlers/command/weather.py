@@ -16,9 +16,6 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # Check if the user has a location
         if location := user.location:
 
-            # Get the location
-            location = location[0]
-
             # Get the location data for further processing
             location_data: dict = {
                 "latitude": location.latitude,
