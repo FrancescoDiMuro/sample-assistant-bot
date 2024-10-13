@@ -40,6 +40,8 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
             user_text = (
                 f"{Emoji.ROUND_PUSHPIN} You've already set your location.\n"
+                "You can either answer the question, or use the /cancel command "
+                "to cancel this operation.\n"
                 "Do you want to overwrite it?"
             )
 
@@ -66,7 +68,8 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         
         else:
 
-            user_text = "Click on the button below to set your location:"
+            user_text = "Click on the button below to set your location\n"
+            "(or use the /cancel command to cancel this operation):"
 
             # Set the keyboard buttons
             keyboard = [
@@ -132,7 +135,7 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
         
     elif user_choice_message == "no":
 
-        user_text = f"{Emoji.PERSON_SHRUGGING} Your location has not been updated."
+        user_text = f"{Emoji.PERSON_SHRUGGING} As requested, your location has not been updated."
 
         await update.message.reply_text(
             text=user_text,
@@ -146,8 +149,8 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
         user_text = (
             f"{Emoji.CROSS_MARK} Invalid text.\n"
-            "Please provide a valid entry using the keyboard below\n"
-            f"<i>(click on the right icon you can find near the message text box):</i>"
+            "Please provide a valid entry using the keyboard below,\n"
+            "or use the command /cancel to cancel this operation:"
         )
 
         await update.message.reply_text(text=user_text)
@@ -254,7 +257,9 @@ set_location_handler = ConversationHandler(
     ],
     states={
         USER_CHOICE: [
-            MessageHandler(filters=filters.TEXT, callback=user_choice)
+            MessageHandler(
+                filters=filters.TEXT & ~filters.Regex(r"^\/cancel$"),
+                callback=user_choice)
         ],
         INPUT_LOCATION: [
             MessageHandler(filters=filters.LOCATION, callback=input_location),
