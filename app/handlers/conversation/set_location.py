@@ -254,7 +254,9 @@ set_location_handler = ConversationHandler(
     ],
     states={
         USER_CHOICE: [
-            MessageHandler(filters=filters.TEXT, callback=user_choice)
+            MessageHandler(
+                filters=filters.TEXT & ~filters.Regex(r"^\/cancel$"),
+                callback=user_choice)
         ],
         INPUT_LOCATION: [
             MessageHandler(filters=filters.LOCATION, callback=input_location),
