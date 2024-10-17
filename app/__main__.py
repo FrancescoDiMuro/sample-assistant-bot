@@ -1,10 +1,11 @@
 from dotenv import load_dotenv
+from handlers.command.news import news_handler
 from handlers.command.weather import weather_handler
 from handlers.conversation.start import start_handler
 from handlers.conversation.set_location import set_location_handler
 from handlers.post_init.post_init import post_init
 from os import getenv
-from telegram import Update
+from telegram import LinkPreviewOptions, Update
 from telegram.constants import ParseMode
 from telegram.ext import ApplicationBuilder, Defaults
 
@@ -16,7 +17,9 @@ load_dotenv()
 if BOT_TOKEN := getenv("BOT_TOKEN"):
 
     # Add default values to the bot settings
-    defaults = Defaults(parse_mode=ParseMode.HTML)
+    defaults = Defaults(
+        parse_mode=ParseMode.HTML,
+        link_preview_options=LinkPreviewOptions(is_disabled=True))
     
     # Create the app
     app = ApplicationBuilder() \
@@ -24,6 +27,9 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .post_init(post_init=post_init) \
         .defaults(defaults=defaults) \
         .build()
+    
+    # ---------- /news (command) ----------
+    app.add_handler(handler=news_handler)
     
     # ---------- /start (conversation) ----------
     app.add_handler(handler=start_handler)
