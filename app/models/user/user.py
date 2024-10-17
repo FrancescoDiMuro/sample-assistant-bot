@@ -30,6 +30,6 @@ class User(Base):
     @hybrid_property
     def has_location(self):
 
-        return len(self.location) > 0
+        return self.location is not None
 
 
