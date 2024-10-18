@@ -25,6 +25,7 @@ class User(Base):
     # through this (User) model
     location = relationship("Location", back_populates="user", lazy="joined", uselist=False)
     reminders = relationship("Reminder", back_populates="user")
+    todos = relationship("Todo", back_populates="user")
 
 
     @hybrid_property
