@@ -35,6 +35,11 @@ def create_calendar(year: int | None = None, month: int | None= None):
     # then use the current year and month
     year = year or current_date.year
     month = month or current_date.month
+
+    # Save current date information
+    current_year =  current_date.year
+    current_month = current_date.month
+    current_day = current_date.day
     
     # Get the formatted month weeks
     formatted_month_weeks = get_formatted_month_weeks(year=year, month=month)
@@ -77,8 +82,14 @@ def create_calendar(year: int | None = None, month: int | None= None):
         # For each day in the current week
         for day in week:
 
-            # If day is 0 (a placeholder), then create an empty inline keyboard button
-            if day == 0:
+            # If day is 0 (a placeholder),
+            # or the day is less than the current day for the current month and year,
+            #  then create an empty inline keyboard button
+            if day == 0 or (
+                day < current_day and 
+                month == current_month and 
+                year == current_year
+            ):
 
                 day_button = InlineKeyboardButton(
                     text=" ",
