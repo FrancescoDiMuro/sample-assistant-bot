@@ -32,7 +32,7 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
     # ---------- /news (command) ----------
     app.add_handler(handler=news_handler)
 
-    # ---------- /news (conversation) ----------
+    # ---------- /todo (conversation) ----------
     app.add_handler(handler=create_todo_handler)
     
     # ---------- /start (conversation) ----------
