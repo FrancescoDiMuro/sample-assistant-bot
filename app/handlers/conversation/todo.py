@@ -1,6 +1,6 @@
 from __future__ import annotations
-from datetime import datetime
 from constants.emoji import Emoji
+from datetime import datetime, timezone
 from models.todo.crud.create import create_todo
 from models.user.crud.retrieve import retrieve_user
 from handlers.utils.inline_calendar import create_calendar
@@ -16,7 +16,9 @@ from telegram.ext import (
     filters
 )
 from telegram.warnings import PTBUserWarning
+from timezonefinder import TimezoneFinder
 from warnings import filterwarnings
+from zoneinfo import ZoneInfo
 
 
 # Conversation Handler steps
@@ -125,7 +127,6 @@ async def select_todo_completion_date(update: Update, context: ContextTypes.DEFA
 
     # Get the expires on date and store it in the context user data dictionary
     expires_on_date = query.data
-                
     context.user_data["todo_data"]["expires_on"] = expires_on_date
 
     # Edit the message to remove the keyboard and show the user the selected date
@@ -134,6 +135,7 @@ async def select_todo_completion_date(update: Update, context: ContextTypes.DEFA
 
     user_text = f"{Emoji.ALARM_CLOCK} Select the hour for the completion time:"
 
+    # Create the hours keyboard
     hours_keyboard = create_hours_keyboard()
     
     await context.bot.send_message(
@@ -185,22 +187,47 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
     if todo_data := context.user_data.pop("todo_data"):
                 
         # Get the full date and concatenate to it the time expiration
-        expires_on: str = f"{todo_data["expires_on"]} {expires_on_time}"
+        local_dt_expires_on: str = f"{todo_data["expires_on"]} {expires_on_time}"
         
         # Transform the expires_on str in a datetime with the specified format
-        expires_on: datetime = datetime.strptime(expires_on, "%Y-%m-%d %H:%M")
+        local_dt_expires_on: datetime = datetime.strptime(local_dt_expires_on, "%Y-%m-%d %H:%M")
 
-        # Overwrite the expires_on field from str to datetime
-        # TODO: it has to be save in UTC format!
-        todo_data["expires_on"] = expires_on
+        # Get the UTC datetime with the added user's timezone information
+        utc_dt_expires_on: datetime =  await local_time_to_utc_time(
+            user_telegram_id=update.effective_user.id, 
+            local_dt=local_dt_expires_on
+        )
 
-        # Save the todo to db
-        if create_todo(todo_data=todo_data):
+        # The conversion between local and utc user's timezone datetime has been successfull
+        if utc_dt_expires_on:
 
-            await update.message.reply_text(
-                text=f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly.",
-                reply_markup=ReplyKeyboardRemove()
+            # Overwrite the expires_on field from str to datetime
+            todo_data["expires_on"] = utc_dt_expires_on
+
+            # Save the todo to db
+            if create_todo(todo_data=todo_data):
+
+                user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly."
+        else:
+
+            user_text = (
+                f"{Emoji.WARNING_SIGN} Warning!\n"
+                "Something went wrong during the todo' save.\n"
+                "Check that you correctly setup a location and try again."
             )
+
+    else:
+
+        user_text = (
+                f"{Emoji.STOP_SIGN} Error!\n"
+                "Something went wrong during the todo' save.\n"
+                "Couldn't find your information in your context user data dictionary."
+            )
+
+    await update.message.reply_text(
+            text=user_text,
+            reply_markup=ReplyKeyboardRemove()
+    )
     
     return ConversationHandler.END
 
@@ -217,6 +244,32 @@ async def invalid_todo_completion_time(update: Update, context: ContextTypes.DEF
     await update.message.reply_text(text=user_text)
 
     return INPUT_TODO_COMPLETION_TIME
+
+
+async def local_time_to_utc_time(user_telegram_id: int, local_dt: datetime):
+
+    # Transform the local dt (datetime) in a timestamp object
+    local_dt_timestamp = local_dt.timestamp()
+
+    # Tranform the local timestamp in utc dt (datetime)
+    utc_dt = datetime.fromtimestamp(local_dt_timestamp, tz=timezone.utc)
+
+    # Get the user location to find out what is its timezone
+    if user := retrieve_user(user_telegram_id=user_telegram_id):
+
+        # If the location is correctly retrieved
+        if location := user.location:
+
+            # Get the latitude and longitude from the user's location
+            latitude, longitude = location.latitude, location.longitude
+
+            # If the user's timezone is correctly obtained
+            if user_timezone := TimezoneFinder().timezone_at(lat=latitude, lng=longitude):
+
+                # Return the UTC datetime with the timezone info
+                return utc_dt.replace(tzinfo=ZoneInfo(key=user_timezone))
+            
+    return None
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
