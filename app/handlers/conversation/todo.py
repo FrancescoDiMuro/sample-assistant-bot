@@ -123,43 +123,52 @@ async def select_todo_completion_date(update: Update, context: ContextTypes.DEFA
     query = update.callback_query
     await query.answer()
 
+    # Get the expires on date and store it in the context user data dictionary
     expires_on_date = query.data
                 
     context.user_data["todo_data"]["expires_on"] = expires_on_date
 
+    # Edit the message to remove the keyboard and show the user the selected date
     user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} Date of completion selected: {expires_on_date}"
     await query.edit_message_text(text=user_text)
 
     user_text = f"{Emoji.ALARM_CLOCK} Select the hour for the completion time:"
 
-    keyboard: list = []
-
-    for hour in range(0, 24):
-
-        for minute in range(0, 60, 5):
-
-            time = f"{hour:02d}:{minute:02d}"
-
-            button = KeyboardButton(text=time)
-
-            keyboard.append([button])
+    hours_keyboard = create_hours_keyboard()
     
     await context.bot.send_message(
         chat_id=query.from_user.id,
         text=user_text,
-        reply_markup=ReplyKeyboardMarkup(
-            keyboard=keyboard,
-            one_time_keyboard=True,
-            resize_keyboard=True,
-            is_persistent=False
-        )
+        reply_markup=hours_keyboard
     )
     
     return INPUT_TODO_COMPLETION_TIME
 
 
+def create_hours_keyboard() -> ReplyKeyboardMarkup:
+
+    # Create the keyboard for the hour selection
+    # Using a list comprehension with nested loops
+    keyboard: list = [
+        [KeyboardButton(text=f"{hour:02d}:{minute:02d}")]
+        for hour in range (0, 24)
+        for minute in range(0, 60, 5)
+    ]
+
+    return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        one_time_keyboard=True,
+        resize_keyboard=True,
+        is_persistent=False
+    )
+
+
 async def handle_calendar_unknown(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
+    # This function simply ignores every callback query coming from any other button
+    # in the inline keyboard, just to not have a callback query hanging around until 
+    # the timeout
+    
     # Get the callback query from the update and answer it
     query = update.callback_query
     await query.answer()
@@ -189,7 +198,7 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
         if create_todo(todo_data=todo_data):
 
             await update.message.reply_text(
-                f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do data saved!",
+                f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly.",
                 reply_markup=ReplyKeyboardRemove()
             )
     
