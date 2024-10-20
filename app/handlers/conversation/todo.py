@@ -1,6 +1,6 @@
 from __future__ import annotations
 from constants.emoji import Emoji
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from models.todo.crud.create import create_todo
 from models.user.crud.retrieve import retrieve_user
 from handlers.utils.inline_calendar import create_calendar
@@ -183,46 +183,43 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
     # Get the time expiration
     expires_on_time: str = update.message.text
 
-    # If there is the todo_data dictionary
-    if todo_data := context.user_data.pop("todo_data"):
-                
-        # Get the full date and concatenate to it the time expiration
-        local_dt_expires_on: str = f"{todo_data["expires_on"]} {expires_on_time}"
+    # Append the time to the expires_on value
+    context.user_data["todo_data"]["expires_on"] += f" {expires_on_time}"
+    
+    # Convert the expires_on value in datetime
+    expires_on_dt = datetime.strptime(context.user_data["todo_data"]["expires_on"], "%Y-%m-%d %H:%M")
+
+    # Get the utf offset based on the user's location and the (local) expires_on_dt
+    utc_offset: datetime =  await get_user_utc_offset(
+        user_telegram_id=update.effective_user.id, 
+        local_dt=expires_on_dt
+    )
+
+    # If the utc offset has been correctly extracted
+    if utc_offset:
+
+        # Calculate the utc expires on datetime with the utc offset
+        utc_expires_on_dt: datetime = expires_on_dt - timedelta(seconds=utc_offset)
+
+        # Overwrite the expires_on value
+        context.user_data["todo_data"]["expires_on"] = utc_expires_on_dt
+
+        # Save the utc offset to the context user data dictionary
+        context.user_data["todo_data"]["utc_offset"] = utc_offset
+
+        # If there is the todo_data dictionary
+        if todo_data := context.user_data.pop("todo_data"):
         
-        # Transform the expires_on str in a datetime with the specified format
-        local_dt_expires_on: datetime = datetime.strptime(local_dt_expires_on, "%Y-%m-%d %H:%M")
-
-        # Get the UTC datetime with the added user's timezone information
-        utc_dt_expires_on: datetime =  await local_time_to_utc_time(
-            user_telegram_id=update.effective_user.id, 
-            local_dt=local_dt_expires_on
-        )
-
-        # The conversion between local and utc user's timezone datetime has been successfull
-        if utc_dt_expires_on:
-
-            # Overwrite the expires_on field from str to datetime
-            todo_data["expires_on"] = utc_dt_expires_on
-
             # Save the todo to db
             if create_todo(todo_data=todo_data):
-
                 user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly."
-        else:
-
-            user_text = (
-                f"{Emoji.WARNING_SIGN} Warning!\n"
-                "Something went wrong during the todo' save.\n"
-                "Check that you correctly setup a location and try again."
-            )
-
     else:
 
         user_text = (
-                f"{Emoji.STOP_SIGN} Error!\n"
-                "Something went wrong during the todo' save.\n"
-                "Couldn't find your information in your context user data dictionary."
-            )
+            f"{Emoji.WARNING_SIGN} Warning!\n"
+            "Something went wrong during the todo' save.\n"
+            "Check that you correctly setup a location and try again."
+        )
 
     await update.message.reply_text(
             text=user_text,
@@ -246,7 +243,7 @@ async def invalid_todo_completion_time(update: Update, context: ContextTypes.DEF
     return INPUT_TODO_COMPLETION_TIME
 
 
-async def local_time_to_utc_time(user_telegram_id: int, local_dt: datetime):
+async def get_user_utc_offset(user_telegram_id: int, local_dt: datetime):
 
     # Transform the local dt (datetime) in a timestamp object
     local_dt_timestamp = local_dt.timestamp()
@@ -266,8 +263,16 @@ async def local_time_to_utc_time(user_telegram_id: int, local_dt: datetime):
             # If the user's timezone is correctly obtained
             if user_timezone := TimezoneFinder().timezone_at(lat=latitude, lng=longitude):
 
-                # Return the UTC datetime with the timezone info
-                return utc_dt.replace(tzinfo=ZoneInfo(key=user_timezone))
+                # Get the UTC offset by the user_timezone
+                utc_offset = utc_dt.replace(tzinfo=ZoneInfo(key=user_timezone)).strftime("%z")
+
+                # Get the sign, hours an minutes for the offset
+                sign, hours, minutes = utc_offset[0], int(utc_offset[1:3]), int(utc_offset[3:5])
+
+                # Convert the utc offset in seconds
+                utc_offset = int(f"{sign}{(hours * 60 * 60) + (minutes * 60)}")
+
+                return utc_offset
             
     return None
 
