@@ -198,11 +198,25 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
         if create_todo(todo_data=todo_data):
 
             await update.message.reply_text(
-                f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly.",
+                text=f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly.",
                 reply_markup=ReplyKeyboardRemove()
             )
     
     return ConversationHandler.END
+
+
+async def invalid_todo_completion_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+
+    user_text = (
+        f"{Emoji.WARNING_SIGN} Warning!\n"
+        "The typed completion time is not valid.\n"
+        "Please use one of the provided completion time in the keboard below, "
+        "or type them in the correct format <i>hh:mm</i> (E.g. 12:35):"
+    )
+
+    await update.message.reply_text(text=user_text)
+
+    return INPUT_TODO_COMPLETION_TIME
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -266,6 +280,10 @@ create_todo_handler = ConversationHandler(
                 filters=filters.Regex(pattern=VALID_INPUT_TIME_PATTERN_COMPILED) & ~filters.Regex(r"^\/cancel$"),
                 callback=input_todo_completion_time
             ),
+            MessageHandler(
+                filters=filters.TEXT & ~filters.Regex(r"^\/cancel$"),
+                callback=invalid_todo_completion_time
+            )
         ]
     },
     fallbacks=[
