@@ -180,30 +180,59 @@ async def handle_calendar_unknown(update: Update, context: ContextTypes.DEFAULT_
 
 async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # Get the time expiration
-    expires_on_time: str = update.message.text
+    # Get the completion time
+    completion_time: str = update.message.text
 
-    # Append the time to the expires_on value
-    context.user_data["todo_data"]["expires_on"] += f" {expires_on_time}"
-    
-    # Convert the expires_on value in datetime
-    expires_on_dt = datetime.strptime(context.user_data["todo_data"]["expires_on"], "%Y-%m-%d %H:%M")
+    # Get the completion date
+    completion_date = context.user_data["todo_data"]["expires_on"]
 
-    # Get the utf offset based on the user's location and the (local) expires_on_dt
-    utc_offset: datetime =  await get_user_utc_offset(
+    # Concatenate the completion date and time 
+    completion_full = f"{completion_date} {completion_time}"
+
+    # Convert the completion date and time datetime format
+    completion_dt = datetime.strptime(completion_full, "%Y-%m-%d %H:%M")
+
+    # Get the user time zone and UTC offset based on the user's location and the (local) completion_dt
+    user_tzinfo, utc_offset =  await get_user_utc_offset(
         user_telegram_id=update.effective_user.id, 
-        local_dt=expires_on_dt
+        local_naive_dt=completion_dt
     )
 
-    # If the utc offset has been correctly extracted
+    # If the UTC offset has been correctly extracted
     if utc_offset:
 
-        # Calculate the utc expires on datetime with the utc offset
-        utc_expires_on_dt: datetime = expires_on_dt - timedelta(seconds=utc_offset)
+        # Convert the naive datetime in an aware datetime in the user tzinfo
+        completion_dt = completion_dt.astimezone(user_tzinfo)
 
-        # Overwrite the expires_on value
-        context.user_data["todo_data"]["expires_on"] = utc_expires_on_dt
+        # Get the current time in UTC format
+        utc_current_time = datetime.now(tz=timezone.utc)
 
+        # Compare the user completion time (in UTC) and the UTC current time
+        if (completion_dt - timedelta(seconds=utc_offset))  <= utc_current_time:
+
+            # Create the hours keyboard
+            hours_keyboard = create_hours_keyboard()
+            
+            user_text = (
+                f"{Emoji.WARNING_SIGN} Warning!\n"
+                "The inserted time is invalid (becasue it's already past or current).\n"
+                "Please insert another time:"
+            )
+
+            await update.message.reply_text(
+                text=user_text,
+                reply_markup=hours_keyboard
+            )
+
+            return INPUT_TODO_COMPLETION_TIME
+
+
+        # Transform the completion_dt in UTC format
+        completion_dt_utc = completion_dt - timedelta(seconds=utc_offset)
+
+        # Overwrite the expires_on value with full converted completion datetime
+        context.user_data["todo_data"]["expires_on"] = completion_dt_utc
+        
         # Save the utc offset to the context user data dictionary
         context.user_data["todo_data"]["utc_offset"] = utc_offset
 
@@ -213,6 +242,7 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
             # Save the todo to db
             if create_todo(todo_data=todo_data):
                 user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly."
+
     else:
 
         user_text = (
@@ -243,10 +273,10 @@ async def invalid_todo_completion_time(update: Update, context: ContextTypes.DEF
     return INPUT_TODO_COMPLETION_TIME
 
 
-async def get_user_utc_offset(user_telegram_id: int, local_dt: datetime):
+async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
 
     # Transform the local dt (datetime) in a timestamp object
-    local_dt_timestamp = local_dt.timestamp()
+    local_dt_timestamp = local_naive_dt.timestamp()
 
     # Tranform the local timestamp in utc dt (datetime)
     utc_dt = datetime.fromtimestamp(local_dt_timestamp, tz=timezone.utc)
@@ -263,8 +293,11 @@ async def get_user_utc_offset(user_telegram_id: int, local_dt: datetime):
             # If the user's timezone is correctly obtained
             if user_timezone := TimezoneFinder().timezone_at(lat=latitude, lng=longitude):
 
+                # Get the user time zone info
+                user_tzinfo = ZoneInfo(key=user_timezone)
+
                 # Get the UTC offset by the user_timezone
-                utc_offset = utc_dt.replace(tzinfo=ZoneInfo(key=user_timezone)).strftime("%z")
+                utc_offset = utc_dt.replace(tzinfo=user_tzinfo).strftime("%z")
 
                 # Get the sign, hours an minutes for the offset
                 sign, hours, minutes = utc_offset[0], int(utc_offset[1:3]), int(utc_offset[3:5])
@@ -272,7 +305,7 @@ async def get_user_utc_offset(user_telegram_id: int, local_dt: datetime):
                 # Convert the utc offset in seconds
                 utc_offset = int(f"{sign}{(hours * 60 * 60) + (minutes * 60)}")
 
-                return utc_offset
+                return [user_tzinfo, utc_offset]
             
     return None
 
@@ -335,7 +368,9 @@ create_todo_handler = ConversationHandler(
         ],
         INPUT_TODO_COMPLETION_TIME: [
             MessageHandler(
-                filters=filters.Regex(pattern=VALID_INPUT_TIME_PATTERN_COMPILED) & ~filters.Regex(r"^\/cancel$"),
+                filters=filters.Regex(
+                    pattern=VALID_INPUT_TIME_PATTERN_COMPILED
+                ) & ~filters.Regex(r"^\/cancel$"),
                 callback=input_todo_completion_time
             ),
             MessageHandler(
