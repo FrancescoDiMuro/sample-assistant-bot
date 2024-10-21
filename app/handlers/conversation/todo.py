@@ -72,7 +72,6 @@ async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
         return ConversationHandler.END
     
 
-# Step USER_CHOICE
 async def input_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Store the todo details
