@@ -22,7 +22,7 @@ from zoneinfo import ZoneInfo
 
 
 # Conversation Handler steps
-INPUT_TODO_DETAILS, SELECT_TODO_COMPLETION_DATE, INPUT_TODO_COMPLETION_TIME = range(3)
+INPUT_TODO_DETAILS, SELECT_TODO_DUE_DATE, INPUT_TODO_DUE_TIME = range(3)
 
 # Time pattern to validate the user's input
 VALID_INPUT_TIME_PATTERN: str = r"^(?:[0-1]\d|2[0-3]):(?:[0-5]\d)$"
@@ -82,7 +82,7 @@ async def input_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE)
     inline_calendar = create_calendar()
 
     user_text = (
-        f"{Emoji.CALENDAR} Select the date of completion:"
+        f"{Emoji.CALENDAR} Select the due date:"
     )
 
     await update.message.reply_text(
@@ -91,7 +91,7 @@ async def input_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE)
     )
 
     # Next step
-    return SELECT_TODO_COMPLETION_DATE
+    return SELECT_TODO_DUE_DATE
 
 
 async def handle_calendar_move_month(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -116,24 +116,24 @@ async def handle_calendar_move_month(update: Update, context: ContextTypes.DEFAU
     await query.edit_message_reply_markup(inline_calendar)
 
     # Return to the date selection step
-    return SELECT_TODO_COMPLETION_DATE
+    return SELECT_TODO_DUE_DATE
 
 
-async def select_todo_completion_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def select_todo_due_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Get the callback query from the update and answer it
     query = update.callback_query
     await query.answer()
 
     # Get the expires on date and store it in the context user data dictionary
-    expires_on_date = query.data
-    context.user_data["todo_data"]["expires_on"] = expires_on_date
+    due_date = query.data
+    context.user_data["todo_data"]["due_date"] = due_date
 
     # Edit the message to remove the keyboard and show the user the selected date
-    user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} Date of completion selected: {expires_on_date}"
+    user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} Due date selected: {due_date}"
     await query.edit_message_text(text=user_text)
 
-    user_text = f"{Emoji.ALARM_CLOCK} Select the hour for the completion time:"
+    user_text = f"{Emoji.ALARM_CLOCK} Select the hour for the due time:"
 
     # Create the hours keyboard
     hours_keyboard = create_hours_keyboard()
@@ -144,7 +144,7 @@ async def select_todo_completion_date(update: Update, context: ContextTypes.DEFA
         reply_markup=hours_keyboard
     )
     
-    return INPUT_TODO_COMPLETION_TIME
+    return INPUT_TODO_DUE_TIME
 
 
 def create_hours_keyboard() -> ReplyKeyboardMarkup:
@@ -175,40 +175,40 @@ async def handle_calendar_unknown(update: Update, context: ContextTypes.DEFAULT_
     query = update.callback_query
     await query.answer()
 
-    return SELECT_TODO_COMPLETION_DATE
+    return SELECT_TODO_DUE_DATE
 
 
-async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
+async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # Get the completion time
-    completion_time: str = update.message.text
+    # Get the due time
+    due_time: str = update.message.text
 
-    # Get the completion date
-    completion_date = context.user_data["todo_data"]["expires_on"]
+    # Get the due date
+    due_date = context.user_data["todo_data"]["due_date"]
 
-    # Concatenate the completion date and time 
-    completion_full = f"{completion_date} {completion_time}"
+    # Concatenate the due date and time 
+    due_full = f"{due_date} {due_time}"
 
-    # Convert the completion date and time datetime format
-    completion_dt = datetime.strptime(completion_full, "%Y-%m-%d %H:%M")
+    # Convert the due date and time datetime format
+    due_dt = datetime.strptime(due_full, "%Y-%m-%d %H:%M")
 
-    # Get the user time zone and UTC offset based on the user's location and the (local) completion_dt
+    # Get the user time zone and UTC offset based on the user's location and the (local) due_dt
     user_tzinfo, utc_offset =  await get_user_utc_offset(
         user_telegram_id=update.effective_user.id, 
-        local_naive_dt=completion_dt
+        local_naive_dt=due_dt
     )
 
     # If the UTC offset has been correctly extracted
     if utc_offset:
 
         # Convert the naive datetime in an aware datetime in the user tzinfo
-        completion_dt = completion_dt.astimezone(user_tzinfo)
+        due_dt = due_dt.astimezone(user_tzinfo)
 
         # Get the current time in UTC format
         utc_current_time = datetime.now(tz=timezone.utc)
 
-        # Compare the user completion time (in UTC) and the UTC current time
-        if completion_dt  <= utc_current_time:
+        # Compare the user due time (in UTC) and the UTC current time
+        if due_dt  <= utc_current_time:
 
             # Create the hours keyboard
             hours_keyboard = create_hours_keyboard()
@@ -224,14 +224,13 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
                 reply_markup=hours_keyboard
             )
 
-            return INPUT_TODO_COMPLETION_TIME
+            return INPUT_TODO_DUE_TIME
 
+        # Transform the due_dt in UTC format
+        due_dt_utc = due_dt - timedelta(seconds=utc_offset)
 
-        # Transform the completion_dt in UTC format
-        completion_dt_utc = completion_dt - timedelta(seconds=utc_offset)
-
-        # Overwrite the expires_on value with full converted completion datetime
-        context.user_data["todo_data"]["expires_on"] = completion_dt_utc
+        # Overwrite the due_date value with full converted due datetime
+        context.user_data["todo_data"]["due_date"] = due_dt_utc
         
         # Save the utc offset to the context user data dictionary
         context.user_data["todo_data"]["utc_offset"] = utc_offset
@@ -247,7 +246,7 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
 
         user_text = (
             f"{Emoji.WARNING_SIGN} Warning!\n"
-            "Something went wrong during the todo' save.\n"
+            "Something went wrong during the todo save.\n"
             "Check that you correctly setup a location and try again."
         )
 
@@ -259,18 +258,18 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
     return ConversationHandler.END
 
 
-async def invalid_todo_completion_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def invalid_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     user_text = (
         f"{Emoji.WARNING_SIGN} Warning!\n"
-        "The typed completion time is not valid.\n"
-        "Please use one of the provided completion time in the keboard below, "
+        "The typed due time is not valid.\n"
+        "Please use one of the provided due time in the keboard below, "
         "or type them in the correct format <i>hh:mm</i> (E.g. 12:35):"
     )
 
     await update.message.reply_text(text=user_text)
 
-    return INPUT_TODO_COMPLETION_TIME
+    return INPUT_TODO_DUE_TIME
 
 
 async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
@@ -356,26 +355,26 @@ create_todo_handler = ConversationHandler(
                 callback=input_todo_details
             )
         ],
-        SELECT_TODO_COMPLETION_DATE: [
+        SELECT_TODO_DUE_DATE: [
             CallbackQueryHandler(
                 pattern=r"^\d{4}\-\d{2}\-\d{2}$",
-                callback=select_todo_completion_date
+                callback=select_todo_due_date
             ),
             CallbackQueryHandler(
                 pattern=r"^(?:<|>)\d{4}\-\d+$",
                 callback=handle_calendar_move_month
             ),
         ],
-        INPUT_TODO_COMPLETION_TIME: [
+        INPUT_TODO_DUE_TIME: [
             MessageHandler(
                 filters=filters.Regex(
                     pattern=VALID_INPUT_TIME_PATTERN_COMPILED
                 ) & ~filters.Regex(r"^\/cancel$"),
-                callback=input_todo_completion_time
+                callback=input_todo_due_time
             ),
             MessageHandler(
                 filters=filters.TEXT & ~filters.Regex(r"^\/cancel$"),
-                callback=invalid_todo_completion_time
+                callback=invalid_todo_due_time
             )
         ]
     },
