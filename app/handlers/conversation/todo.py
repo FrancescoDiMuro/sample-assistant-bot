@@ -208,7 +208,7 @@ async def input_todo_completion_time(update: Update, context: ContextTypes.DEFAU
         utc_current_time = datetime.now(tz=timezone.utc)
 
         # Compare the user completion time (in UTC) and the UTC current time
-        if (completion_dt - timedelta(seconds=utc_offset))  <= utc_current_time:
+        if completion_dt  <= utc_current_time:
 
             # Create the hours keyboard
             hours_keyboard = create_hours_keyboard()
