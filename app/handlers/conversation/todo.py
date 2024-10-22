@@ -244,7 +244,7 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
             return INPUT_TODO_DUE_TIME
 
         # Transform the due_dt in UTC format
-        due_dt_utc = due_dt - timedelta(seconds=utc_offset)
+        due_dt_utc = due_dt.astimezone(tz=timezone.utc)
 
         # Overwrite the due_date value with full converted due datetime
         context.user_data["todo_data"]["due_date"] = due_dt_utc
