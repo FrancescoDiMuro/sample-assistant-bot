@@ -370,7 +370,7 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
                 
             # If the todo is correctly saved
             if save_todo(todo_data=todo_data):
-                user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do saved correctly."
+                user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do without reminder saved correctly."
 
             await update.message.reply_text(
                 text=user_text,
