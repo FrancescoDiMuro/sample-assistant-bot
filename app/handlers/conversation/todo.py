@@ -212,8 +212,8 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
         local_naive_dt=due_dt
     )
 
-    # If the UTC offset has been correctly extracted
-    if utc_offset:
+    # If the user_tzinfo and UTC offset have been correctly extracted
+    if user_tzinfo and utc_offset:
 
         # Insert the user tzinfo in the todo_data for further processing (reminder)
         context.user_data["todo_data"]["user_tzinfo"] = user_tzinfo
