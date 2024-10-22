@@ -294,7 +294,10 @@ async def invalid_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TY
         f"{Emoji.WARNING_SIGN} Warning!\n"
         "The typed due time is not valid.\n"
         "Please use one of the provided due time in the keboard below, "
-        "or type them in the correct format <i>hh:mm</i> (E.g. 12:35):"
+        "or type them in the correct format <i>hh:mm</i>,\n"
+        "where <i>hh</i> stands for hours (24-hours clock zero padded) between 00 (midnight) to 23, "
+        "and <i>mm</i> stands for zero padded minutes between 00 to 59.\n"
+        "(Example: 12:35):"
     )
 
     await update.message.reply_text(text=user_text)
