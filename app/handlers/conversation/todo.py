@@ -162,10 +162,11 @@ async def handle_calendar_month_update(update: Update, context: ContextTypes.DEF
     # Get the callback data
     callback_data = query.data
     
-    # Get the year and the month to build the calendar for the previous month
+    # Get the year and the month to build the calendar for the previous
+    # or next month (depening which button has been clicked)
     year, month = [
         int(item) 
-        for item in callback_data.replace("<", "").replace(">", "").split("-")
+        for item in callback_data[1:].split("-")
     ]
     
     # Create the calendar
