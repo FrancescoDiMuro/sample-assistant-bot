@@ -123,31 +123,7 @@ async def input_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE)
     return SELECT_TODO_DUE_DATE
 
 
-async def handle_calendar_month_update(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-
-    # Get the callback query from the update and answer it
-    query = update.callback_query
-    await query.answer()
-
-    # Get the callback data
-    callback_data = query.data
-    
-    # Get the year and the month to build the calendar for the previous month
-    year, month = [
-        int(item) 
-        for item in callback_data.replace("<", "").replace(">", "").split("-")
-    ]
-    
-    # Create the calendar
-    inline_calendar = create_calendar(year=year, month=month)
-
-    # Edit the message
-    await query.edit_message_reply_markup(inline_calendar)
-
-    # Return to the date selection step
-    return SELECT_TODO_DUE_DATE
-
-
+# Step 2
 async def select_todo_due_date(update: Update, context: ContextTypes.DEFAULT_TYPE):
     
     # Get the callback query from the update and answer it
@@ -176,22 +152,29 @@ async def select_todo_due_date(update: Update, context: ContextTypes.DEFAULT_TYP
     return INPUT_TODO_DUE_TIME
 
 
-def create_hours_keyboard() -> ReplyKeyboardMarkup:
+async def handle_calendar_month_update(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
-    # Create the keyboard for the hour selection
-    # Using a list comprehension with nested loops
-    keyboard: list = [
-        [KeyboardButton(text=f"{hour:02d}:{minute:02d}")]
-        for hour in range (0, 24)
-        for minute in range(0, 60, 5)
+    # Get the callback query from the update and answer it
+    query = update.callback_query
+    await query.answer()
+
+    # Get the callback data
+    callback_data = query.data
+    
+    # Get the year and the month to build the calendar for the previous month
+    year, month = [
+        int(item) 
+        for item in callback_data.replace("<", "").replace(">", "").split("-")
     ]
+    
+    # Create the calendar
+    inline_calendar = create_calendar(year=year, month=month)
 
-    return ReplyKeyboardMarkup(
-        keyboard=keyboard,
-        one_time_keyboard=True,
-        resize_keyboard=True,
-        is_persistent=False
-    )
+    # Edit the message
+    await query.edit_message_reply_markup(inline_calendar)
+
+    # Return to the date selection step
+    return SELECT_TODO_DUE_DATE
 
 
 async def handle_calendar_unknown(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -206,7 +189,7 @@ async def handle_calendar_unknown(update: Update, context: ContextTypes.DEFAULT_
 
     return SELECT_TODO_DUE_DATE
 
-
+# Step 3
 async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     # Get the due time
@@ -317,6 +300,24 @@ async def invalid_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TY
     return INPUT_TODO_DUE_TIME
 
 
+def create_hours_keyboard() -> ReplyKeyboardMarkup:
+
+    # Create the keyboard for the hour selection
+    # Using a list comprehension with nested loops
+    keyboard: list = [
+        [KeyboardButton(text=f"{hour:02d}:{minute:02d}")]
+        for hour in range (0, 24)
+        for minute in range(0, 60, 5)
+    ]
+
+    return ReplyKeyboardMarkup(
+        keyboard=keyboard,
+        one_time_keyboard=True,
+        resize_keyboard=True,
+        is_persistent=False
+    )
+
+# Step 4
 async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Get the user choice
@@ -386,7 +387,7 @@ async def handle_wrong_user_choice(update: Update, context: ContextTypes.DEFAULT
 
     return USER_CHOICE
 
-
+# Step 5
 async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
     # Get the reminder time
@@ -501,12 +502,6 @@ async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
             chat_id=context.job.chat_id,
             text=user_text
         )
-    
-
-def save_todo(todo_data: dict) -> UUID:
-
-    # Save the todo to db
-    return create_todo(todo_data=todo_data)
 
 
 async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
@@ -544,6 +539,12 @@ async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
                 return [user_tzinfo, utc_offset]
             
     return None
+
+
+def save_todo(todo_data: dict) -> UUID:
+
+    # Save the todo to db
+    return create_todo(todo_data=todo_data)
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
