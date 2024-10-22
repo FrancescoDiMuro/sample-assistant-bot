@@ -604,6 +604,7 @@ create_todo_handler = ConversationHandler(
                 pattern=r"^(?:<|>)\d{4}\-\d+$",
                 callback=handle_calendar_month_update
             ),
+            CallbackQueryHandler(callback=handle_calendar_unknown)
         ],
         INPUT_TODO_DUE_TIME: [
             MessageHandler(
