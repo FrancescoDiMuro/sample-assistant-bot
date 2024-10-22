@@ -450,8 +450,6 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # If there is the todo_data dictionary
     if todo_data := context.user_data.pop("todo_data"):
-
-        todo_data.pop("user_tzinfo")
             
         # If the todo is correctly saved
         if todo_id := save_todo(todo_data=todo_data):
@@ -467,7 +465,7 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
             job = job_queue.run_once(
                 callback=notify_user_job,
                 name=f"notify_user_job_{todo_id.hex}",
-                when=reminder_datetime.replace(tzinfo=timezone.utc),
+                when=reminder_datetime,
                 data=todo_id,
                 chat_id=update.effective_user.id
             )
