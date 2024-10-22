@@ -101,6 +101,7 @@ async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
         return ConversationHandler.END
     
+    
 # Step 1
 async def input_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
