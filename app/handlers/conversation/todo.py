@@ -215,9 +215,6 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
     # If the user_tzinfo and UTC offset have been correctly extracted
     if user_tzinfo and utc_offset:
 
-        # Insert the user tzinfo in the todo_data for further processing (reminder)
-        context.user_data["todo_data"]["user_tzinfo"] = user_tzinfo
-
         # Convert the naive datetime in an aware datetime in the user tzinfo
         due_dt = due_dt.astimezone(user_tzinfo)
 
@@ -409,21 +406,11 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
     due_date: datetime = context.user_data["todo_data"]["due_date"]
 
     # Calculate the reminder datetime (in UTC), since due_date is in UTC
-    reminder_datetime = due_date - timedelta(**reminder_time)
-    
-    # Get the user timezone info
-    user_tzinfo = context.user_data["todo_data"]["user_tzinfo"]
-    
-    now_utc = datetime.now(tz=timezone.utc)
-    print(f"{now_utc = }")
-    now_diff_utc = now_utc - timedelta(**reminder_time)
-    print(f"{now_diff_utc = }")
-    now_diff_with_user_tzinfo = now_diff_utc.replace(tzinfo=user_tzinfo)
-    print(f"{now_diff_with_user_tzinfo = }")
-    print(f"{reminder_datetime} <= {now_diff_with_user_tzinfo} ? {reminder_datetime <= now_diff_with_user_tzinfo}")
+    reminder_datetime = due_date - timedelta(**reminder_time)    
 
-    # TODO: fix this
-    if reminder_datetime <= now_diff_with_user_tzinfo:
+    # If the reminder_time is less than the current time (everything in UTC),
+    # ask the user to insert another reminder_time
+    if reminder_datetime <= (datetime.now(timezone.utc)):
 
         # Create the list of reminder buttons
         reminder_times: list = [
