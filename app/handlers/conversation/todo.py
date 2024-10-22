@@ -392,24 +392,27 @@ async def handle_wrong_user_choice(update: Update, context: ContextTypes.DEFAULT
 
     return USER_CHOICE
 
+
 # Step 5
 async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
 
-    # Get the reminder time
-    reminder_time = update.message.text
+    # Get the reminder time, and split it 0: type, 1:amount
+    reminder_time = update.message.text.split(" ")
 
-    reminder_time = reminder_time.split(" ")
-
+    # Extract the needed information
+    # Here we are sure of the data we're dealing with
+    # because of the strictness of the pattern in the handler,
+    # so we can directly manage the data without doing additional checking
     reminder_time = {reminder_time[1]: int(reminder_time[0])}
     
     # Get the due date
     due_date: datetime = context.user_data["todo_data"]["due_date"]
 
+    # Calculate the reminder datetime (in UTC), since due_date is in UTC
     reminder_datetime = due_date - timedelta(**reminder_time)
-    print(f"{reminder_datetime = }")
     
+    # Get the user timezone info
     user_tzinfo = context.user_data["todo_data"]["user_tzinfo"]
-
     
     now_utc = datetime.now(tz=timezone.utc)
     print(f"{now_utc = }")
