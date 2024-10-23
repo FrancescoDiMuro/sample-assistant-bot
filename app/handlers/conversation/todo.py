@@ -1,11 +1,11 @@
 from __future__ import annotations
-from uuid import UUID
 from constants.emoji import Emoji
 from datetime import datetime, timedelta, timezone
+from handlers.utils.inline_calendar import create_calendar
+from models.reminder.crud.create import create_reminder
 from models.todo.crud.create import create_todo
 from models.todo.crud.retrieve import retrieve_todo
 from models.user.crud.retrieve import retrieve_user
-from handlers.utils.inline_calendar import create_calendar
 from re import compile, IGNORECASE, X
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
@@ -19,6 +19,7 @@ from telegram.ext import (
 )
 from telegram.warnings import PTBUserWarning
 from timezonefinder import TimezoneFinder
+from uuid import UUID
 from warnings import filterwarnings
 from zoneinfo import ZoneInfo
 
@@ -454,32 +455,45 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
         # If the todo is correctly saved
         if todo_id := save_todo(todo_data=todo_data):
 
-            reminder_data: dict = {
+            # Set the reminder name
+            reminder_name: str = f"notify_user_job_{todo_id.hex}"
 
+            # Prepare the PTB job data
+            job_data: dict = {
+                "callback": notify_user_job,
+                "name": reminder_name,
+                "when": reminder_datetime,
+                "data": todo_id,
+                "chat_id": update.effective_user.id
             }
 
-            # Create the reminder
-            # reminder = create_reminder(reminder_data=reminder_data)
-
+            # Get the job queue
             job_queue = context.job_queue
-            job = job_queue.run_once(
-                callback=notify_user_job,
-                name=f"notify_user_job_{todo_id.hex}",
-                when=reminder_datetime,
-                data=todo_id,
-                chat_id=update.effective_user.id
-            )
+            
+            # Schedule the job to run
+            job = job_queue.run_once(**job_data)
 
-            print(job)
+            # If the job has been correctly added to the queue
+            if job:
 
-            user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do with reminder saved correctly."
+                # Prepare the reminder data
+                reminder_data: dict = {
+                    "name": reminder_name,
+                    "todo_id": todo_id,
+                    "remind_at": reminder_datetime
+                }
 
-        await update.message.reply_text(
-            text=user_text,
-            reply_markup=ReplyKeyboardRemove()
-        )
+                # Create the reminder
+                if create_reminder(reminder_data=reminder_data):
 
-        return ConversationHandler.END
+                    user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do with reminder saved correctly."
+
+                    await update.message.reply_text(
+                        text=user_text,
+                        reply_markup=ReplyKeyboardRemove()
+                    )
+
+                    return ConversationHandler.END
     
 
 async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
