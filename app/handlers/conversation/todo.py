@@ -1,6 +1,6 @@
 from __future__ import annotations
 from constants.emoji import Emoji
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta, UTC
 from handlers.utils.inline_calendar import create_calendar
 from models.reminder.crud.create import create_reminder
 from models.todo.crud.create import create_todo
@@ -220,7 +220,7 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
         due_dt = due_dt.astimezone(user_tzinfo)
 
         # Get the current time in UTC format
-        utc_current_time = datetime.now(tz=timezone.utc)
+        utc_current_time = datetime.now(tz=UTC)
 
         # Compare the user due time (in UTC) and the UTC current time
         if due_dt  <= utc_current_time:
@@ -242,7 +242,7 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
             return INPUT_TODO_DUE_TIME
 
         # Transform the due_dt in UTC format
-        due_dt_utc = due_dt.astimezone(tz=timezone.utc)
+        due_dt_utc = due_dt.astimezone(tz=UTC)
 
         # Overwrite the due_date value with full converted due datetime
         context.user_data["todo_data"]["due_date"] = due_dt_utc
@@ -411,7 +411,7 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
 
     # If the reminder_time is less than the current time (everything in UTC),
     # ask the user to insert another reminder_time
-    if reminder_datetime <= (datetime.now(timezone.utc)):
+    if reminder_datetime <= (datetime.now(UTC)):
 
         # Create the list of reminder buttons
         reminder_times: list = [
@@ -517,7 +517,7 @@ async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
     local_dt_timestamp = local_naive_dt.timestamp()
 
     # Tranform the local timestamp in utc dt (datetime)
-    utc_dt = datetime.fromtimestamp(local_dt_timestamp, tz=timezone.utc)
+    utc_dt = datetime.fromtimestamp(local_dt_timestamp, tz=UTC)
 
     # Get the user location to find out what is its timezone
     if user := retrieve_user(user_telegram_id=user_telegram_id):
