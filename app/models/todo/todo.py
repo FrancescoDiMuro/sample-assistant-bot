@@ -25,4 +25,4 @@ class Todo(Base):
     # Thanks to these variables, we can access the specified models
     # through this (Todo) model
     user = relationship("User", back_populates="todos")
-    reminder = relationship("Reminder", back_populates="todo")
+    reminder = relationship("Reminder", back_populates="todo", uselist=False, lazy="joined")

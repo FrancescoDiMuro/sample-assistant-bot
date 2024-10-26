@@ -21,4 +21,4 @@ class Reminder(Base):
     # These are the relationships between other models
     # Thanks to these variables, we can access the specified models
     # through this (Todo) model
-    todo = relationship("Todo", back_populates="reminder")
+    todo = relationship("Todo", back_populates="reminder", uselist=False)
