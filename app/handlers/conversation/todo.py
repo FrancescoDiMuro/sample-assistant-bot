@@ -455,16 +455,16 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
         # If the todo is correctly saved
         if todo_id := save_todo(todo_data=todo_data):
 
-            # Set the reminder name
-            reminder_name: str = f"notify_user_job_{todo_id.hex}"
+            # Set the job name
+            reminder_job_name: str = f"remind_user_job_{todo_id.hex}"
 
             # Get the user Telegram id
             user_telegram_id: int = update.effective_user.id
 
             # Prepare the PTB job data
-            job_data: dict = {
+            reminder_job_data: dict = {
                 "callback": notify_user_job,
-                "name": reminder_name,
+                "name": reminder_job_name,
                 "when": reminder_datetime,
                 "data": todo_id,
                 "chat_id": user_telegram_id,
@@ -475,14 +475,14 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
             job_queue = context.job_queue
             
             # Schedule the job to run
-            job = job_queue.run_once(**job_data)
+            reminder_job = job_queue.run_once(**reminder_job_data)
 
             # If the job has been correctly added to the queue
-            if job:
+            if reminder_job:
 
                 # Prepare the reminder data
                 reminder_data: dict = {
-                    "name": reminder_name,
+                    "name": reminder_job_name,
                     "todo_id": todo_id,
                     "remind_at": reminder_datetime
                 }
