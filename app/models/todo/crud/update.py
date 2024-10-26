@@ -20,4 +20,10 @@ def update_todo(todo_id: UUID, todo_data: dict) -> UUID:
                                 .where(Todo.id == todo_id) \
                                 .values(**todo_data)
         
-        return session.execute(sql_statement)
+        # Execute the statement
+        session.execute(sql_statement)
+
+        # Commit the changes to the db
+        session.commit()
+        
+        return todo_id
