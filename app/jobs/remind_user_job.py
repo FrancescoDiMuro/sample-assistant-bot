@@ -5,7 +5,7 @@ from models.todo.crud.retrieve import retrieve_todo
 from telegram.ext import ContextTypes
 
 
-async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
+async def remind_user_job(context: ContextTypes.DEFAULT_TYPE):
 
     # Get the job instance
     job = context.job

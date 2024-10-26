@@ -2,7 +2,7 @@ from __future__ import annotations
 from constants.emoji import Emoji
 from datetime import datetime, timedelta, UTC
 from handlers.utils.inline_calendar import create_calendar
-from jobs.notify_user_job import notify_user_job
+from app.jobs.remind_user_job import remind_user_job
 from models.reminder.crud.create import create_reminder
 from models.todo.crud.create import create_todo
 from models.user.crud.retrieve import retrieve_user
@@ -463,7 +463,7 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
 
             # Prepare the PTB job data
             reminder_job_data: dict = {
-                "callback": notify_user_job,
+                "callback": remind_user_job,
                 "name": reminder_job_name,
                 "when": reminder_datetime,
                 "data": todo_id,
