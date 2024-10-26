@@ -464,7 +464,8 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
                 "name": reminder_name,
                 "when": reminder_datetime,
                 "data": todo_id,
-                "chat_id": update.effective_user.id
+                "chat_id": update.effective_user.id,
+                "user_id": update.effective_user.id
             }
 
             # Get the job queue
