@@ -458,14 +458,17 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
             # Set the reminder name
             reminder_name: str = f"notify_user_job_{todo_id.hex}"
 
+            # Get the user Telegram id
+            user_telegram_id: int = update.effective_user.id
+
             # Prepare the PTB job data
             job_data: dict = {
                 "callback": notify_user_job,
                 "name": reminder_name,
                 "when": reminder_datetime,
                 "data": todo_id,
-                "chat_id": update.effective_user.id,
-                "user_id": update.effective_user.id
+                "chat_id": user_telegram_id,
+                "user_id": user_telegram_id
             }
 
             # Get the job queue
