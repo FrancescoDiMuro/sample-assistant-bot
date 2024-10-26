@@ -30,8 +30,8 @@ async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
             )
         ).id
 
-        # Get the user_id from the job data
-        user_id = job.user_id
+        # Get the user Telegram id from the job data
+        user_telegram_id = job.user_id
 
         # Here we are using the bot_data dictionary instead of
         # the user_data one, since it's not available.
@@ -41,16 +41,16 @@ async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
         # another inner dictionary, which contains other information.
         # This if avoids another declaration for the inner dictionary
         # if it already exists
-        if not context.bot_data.get(user_id):
-            context.bot_data[user_id] = {}
+        if not context.bot_data.get(user_telegram_id):
+            context.bot_data[user_telegram_id] = {}
 
         # This if avoids another declaration for the "pending_todos"
         # inner dictionary
-        if not context.bot_data.get(user_id).get("pending_todos"):
-            context.bot_data[user_id]["pending_todos"] = {}
+        if not context.bot_data.get(user_telegram_id).get("pending_todos"):
+            context.bot_data[user_telegram_id]["pending_todos"] = {}
 
         # In any case, assign the todo id to the dictionary "hierarchy"
-        context.bot_data[user_id]["pending_todos"][message_id] = todo.id
+        context.bot_data[user_telegram_id]["pending_todos"][message_id] = todo.id
 
         # Delete the reminder
         delete_reminder(reminder_id=todo.reminder.id)
