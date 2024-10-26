@@ -3,6 +3,7 @@ from constants.emoji import Emoji
 from datetime import datetime, timedelta, UTC
 from handlers.utils.inline_calendar import create_calendar
 from models.reminder.crud.create import create_reminder
+from models.reminder.crud.delete import delete_reminder
 from models.todo.crud.create import create_todo
 from models.todo.crud.retrieve import retrieve_todo
 from models.user.crud.retrieve import retrieve_user
@@ -498,17 +499,27 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
 
 async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
 
-    if todo := retrieve_todo(todo_id=context.job.data):
+    # Get the job instance
+    job = context.job
+
+    # Retrieve the todo
+    if todo := retrieve_todo(todo_id=job.data):
+
+        # Calculate the due_date, adding the UTC offset based on the user's location
+        user_due_date = todo.due_date + timedelta(seconds=todo.utc_offset)
 
         user_text = (
-            f"{Emoji.ALARM_CLOCK} Reminder:\n"
+            f"{Emoji.ALARM_CLOCK} Reminder (due {user_due_date}):\n"
             f"{todo.details}"
         )
 
         await context.bot.send_message(
-            chat_id=context.job.chat_id,
+            chat_id=job.chat_id,
             text=user_text
         )
+
+        # Delete the reminder
+        delete_reminder(reminder_id=todo.reminder.id)
 
 
 async def get_user_utc_offset(user_telegram_id: int, local_naive_dt: datetime):
