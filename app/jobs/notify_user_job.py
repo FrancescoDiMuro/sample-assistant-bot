@@ -18,13 +18,39 @@ async def notify_user_job(context: ContextTypes.DEFAULT_TYPE):
 
         user_text = (
             f"{Emoji.ALARM_CLOCK} Reminder (due {user_due_date}):\n"
-            f"{todo.details}"
+            f"{todo.details}\n\n"
+            f"<i>React with a {Emoji.THUMBS_UP_SIGN} to the message to mark the to-do as completed.</i>"
         )
 
-        await context.bot.send_message(
-            chat_id=job.chat_id,
-            text=user_text
-        )
+        # Get the message_id of the message to send to the user
+        message_id: int = (
+            await context.bot.send_message(
+                chat_id=job.chat_id,
+                text=user_text
+            )
+        ).id
+
+        # Get the user_id from the job data
+        user_id = job.user_id
+
+        # Here we are using the bot_data dictionary instead of
+        # the user_data one, since it's not available.
+        # So, in order to keep all the data split for each user,
+        # we have to created a dictionary in the bot_data one
+        # for every user, using its telegram id as a key for
+        # another inner dictionary, which contains other information.
+        # This if avoids another declaration for the inner dictionary
+        # if it already exists
+        if not context.bot_data.get(user_id):
+            context.bot_data[user_id] = {}
+
+        # This if avoids another declaration for the "pending_todos"
+        # inner dictionary
+        if not context.bot_data.get(user_id).get("pending_todos"):
+            context.bot_data[user_id]["pending_todos"] = {}
+
+        # In any case, assign the todo id to the dictionary "hierarchy"
+        context.bot_data[user_id]["pending_todos"][message_id] = todo.id
 
         # Delete the reminder
         delete_reminder(reminder_id=todo.reminder.id)
