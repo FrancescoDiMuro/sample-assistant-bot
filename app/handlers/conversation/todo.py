@@ -490,7 +490,12 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
                 # Create the reminder
                 if create_reminder(reminder_data=reminder_data):
 
-                    user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do with reminder saved correctly."
+                    user_text = (
+                        f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do with reminder saved correctly.\n"
+                        "You'll be notified at the specified reminder time, and, if the to-do "
+                        "will not be marked as 'done', you'll be reminded a second time at the "
+                        "to-do specified time."
+                    )
 
                     await update.message.reply_text(
                         text=user_text,
