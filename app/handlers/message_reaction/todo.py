@@ -52,6 +52,22 @@ async def mark_todo_as_done(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         # Delete the pending todo
                         context.bot_data[user_telegram_id]["pending_todos"].pop(message_id)
 
+                        # Set the job name
+                        todo_job_name: str = f"todo_user_job_{todo_id.hex}"
+
+                        # Delete the other job
+                        jobs = context.job_queue.get_jobs_by_name(name=todo_job_name)
+
+                        # If the job has been found
+                        if(jobs):
+
+                            # Get the job
+                            todo_job = jobs[0]
+
+                            # Disable and delete the job
+                            todo_job.enabled = False
+                            todo_job.schedule_removal()
+
                         # User text
                         user_text = (
                             f"To-Do checked as completed on "
