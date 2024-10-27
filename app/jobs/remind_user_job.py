@@ -25,7 +25,7 @@ async def remind_user_job(context: ContextTypes.DEFAULT_TYPE):
 
         user_text = (
             f"{Emoji.ALARM_CLOCK} Reminder (due {user_due_date:%Y-%m-%d %H:%M})\n"
-            f"{f"(first reminder set at {user_remind_at:%Y-%m-%d %H:%M})\n" if reminder else ""}"
+            f"{f"(first reminder set at {user_remind_at:%Y-%m-%d %H:%M})\n\n" if reminder else ""}"
             "To-do details:\n"
             f"<i>{todo.details}</i>\n\n"
             f"<i>React with a {Emoji.THUMBS_UP_SIGN} to the message to mark the to-do as completed.</i>"
