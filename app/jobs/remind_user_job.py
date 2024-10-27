@@ -13,11 +13,15 @@ async def remind_user_job(context: ContextTypes.DEFAULT_TYPE):
     # Retrieve the todo
     if todo := retrieve_todo(todo_id=job.data):
 
+        # Get the reminder (or None if not present)
+        reminder = todo.reminder
+
         # Calculate the due_date, adding the UTC offset based on the user's location
         user_due_date = todo.due_date + timedelta(seconds=todo.utc_offset)
 
         user_text = (
-            f"{Emoji.ALARM_CLOCK} Reminder (due {user_due_date}):\n"
+            f"{Emoji.ALARM_CLOCK} Reminder (due {user_due_date::%Y-%m-%d %H:%M}):\n"
+            f"{f"to be reminded at {reminder.remind_at:%Y-%m-%d %H:%M}" if reminder else ""}\n"
             f"{todo.details}\n\n"
             f"<i>React with a {Emoji.THUMBS_UP_SIGN} to the message to mark the to-do as completed.</i>"
         )
@@ -53,5 +57,6 @@ async def remind_user_job(context: ContextTypes.DEFAULT_TYPE):
         context.bot_data[user_telegram_id]["pending_todos"][message_id] = todo.id
 
         # Delete the reminder
-        delete_reminder(reminder_id=todo.reminder.id)
+        if reminder:
+            delete_reminder(reminder_id=reminder.id)
     
