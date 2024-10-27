@@ -2,7 +2,7 @@ from __future__ import annotations
 from constants.emoji import Emoji
 from datetime import datetime, timedelta, UTC
 from handlers.utils.inline_calendar import create_calendar
-from app.jobs.remind_user_job import remind_user_job
+from jobs.remind_user_job import remind_user_job
 from models.reminder.crud.create import create_reminder
 from models.todo.crud.create import create_todo
 from models.user.crud.retrieve import retrieve_user
@@ -461,7 +461,7 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
             # Get the user Telegram id
             user_telegram_id: int = update.effective_user.id
 
-            # Prepare the PTB job data
+            # Prepare the PTB job data (for the reminder before the todo)
             reminder_job_data: dict = {
                 "callback": remind_user_job,
                 "name": reminder_job_name,
@@ -471,14 +471,28 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
                 "user_id": user_telegram_id
             }
 
+            # Set the job name
+            todo_job_name: str = f"todo_user_job_{todo_id.hex}"
+
+            # Prepare the PTB job data (for the reminder at todo specified date)
+            todo_job_data: dict = {
+                "callback": remind_user_job,
+                "name": todo_job_name,
+                "when": todo_data["due_date"],
+                "data": todo_id,
+                "chat_id": user_telegram_id,
+                "user_id": user_telegram_id
+            }
+
             # Get the job queue
             job_queue = context.job_queue
             
-            # Schedule the job to run
+            # Schedule the jobs to run
             reminder_job = job_queue.run_once(**reminder_job_data)
+            todo_job = job_queue.run_once(**todo_job_data)
 
-            # If the job has been correctly added to the queue
-            if reminder_job:
+            # If the jobs have been correctly added to the queue
+            if reminder_job and todo_job:
 
                 # Prepare the reminder data
                 reminder_data: dict = {
