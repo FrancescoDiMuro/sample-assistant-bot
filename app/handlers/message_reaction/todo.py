@@ -1,4 +1,4 @@
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from constants.emoji import Emoji
 from models.todo.crud.retrieve import retrieve_todo
 from models.todo.crud.update import update_todo
@@ -49,6 +49,12 @@ async def mark_todo_as_done(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         todo_data=todo_data
                     ):
                         
+                        # Get the user UTC offset
+                        user_utc_offset = todo.utc_offset
+
+                        # Calculate the completed time for the current to-do
+                        todo_completed_time = datetime.now(UTC) + timedelta(seconds=user_utc_offset)
+                        
                         # Delete the pending todo
                         context.bot_data[user_telegram_id]["pending_todos"].pop(message_id)
 
@@ -71,7 +77,7 @@ async def mark_todo_as_done(update: Update, context: ContextTypes.DEFAULT_TYPE):
                         # User text
                         user_text = (
                             f"To-Do checked as completed on "
-                            f"{datetime.now(tz=UTC):%Y-%m-%d %H:%M} (UTC)"
+                            f"{todo_completed_time:%Y-%m-%d %H:%M}"
                         )
                         
                         await context.bot.send_message(
