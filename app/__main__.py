@@ -4,6 +4,7 @@ from handlers.command.weather import weather_handler
 from handlers.conversation.start import start_handler
 from handlers.conversation.set_location import set_location_handler
 from handlers.conversation.todo import create_todo_handler
+from handlers.message_reaction.todo import message_reaction_handler
 from handlers.post_init.post_init import post_init
 from os import getenv
 from telegram import LinkPreviewOptions, Update
@@ -29,17 +30,21 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .defaults(defaults=defaults) \
         .build()
     
+    
+    # ---------- (message reaction) ----------
+    app.add_handler(handler=message_reaction_handler)
+    
     # ---------- /news (command) ----------
     app.add_handler(handler=news_handler)
-
-    # ---------- /todo (conversation) ----------
-    app.add_handler(handler=create_todo_handler)
+    
+    # ---------- /setlocation (conversation) ----------
+    app.add_handler(handler=set_location_handler)
     
     # ---------- /start (conversation) ----------
     app.add_handler(handler=start_handler)
 
-    # ---------- /setlocation (conversation) ----------
-    app.add_handler(handler=set_location_handler)
+    # ---------- /todo (conversation) ----------
+    app.add_handler(handler=create_todo_handler)
 
     # ---------- /weather (command) ----------
     app.add_handler(handler=weather_handler)

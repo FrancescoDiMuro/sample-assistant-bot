@@ -13,6 +13,10 @@ BOT_COMMANDS = [
         "description": "Set the user location"
     },
     {
+        "command": "/todo",
+        "description": "Create a new to-do"
+    },
+    {
         "command": "/todos",
         "description": "Show the user's to-dos"
     },

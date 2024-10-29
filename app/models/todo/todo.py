@@ -15,7 +15,8 @@ class Todo(Base):
     id: Mapped[UUID] = mapped_column(primary_key=True, nullable=False, default=uuid4)
     user_id: Mapped[UUID] = mapped_column(ForeignKey("users.id"), nullable=False)
     details: Mapped[str] = mapped_column(nullable=False)
-    expires_on: Mapped[datetime] = mapped_column(nullable=False)
+    due_date: Mapped[datetime] = mapped_column(nullable=False)
+    utc_offset: Mapped[int] = mapped_column(nullable=False)
     done: Mapped[bool] = mapped_column(nullable=False, default=False)
     created_at: Mapped[datetime] = mapped_column(nullable=False, default=datetime.now(UTC))
     updated_at: Mapped[datetime] = mapped_column(nullable=True, onupdate=datetime.now(UTC))
@@ -24,3 +25,4 @@ class Todo(Base):
     # Thanks to these variables, we can access the specified models
     # through this (Todo) model
     user = relationship("User", back_populates="todos")
+    reminder = relationship("Reminder", back_populates="todo", uselist=False, lazy="joined")
