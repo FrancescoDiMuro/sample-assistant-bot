@@ -4,12 +4,13 @@ from models.todo.todo import Todo
 from sqlalchemy import Select, select
 
 
-def retrieve_todos() -> Todo | None:
+def retrieve_todos(is_done: bool = False) -> Todo | None:
 
     with SessionLocal() as session:
 
         sql_statement: Select = select(Todo) \
-                                .where(Todo.done.is_(False))
+                                .where(Todo.done.is_(is_done)) \
+                                .order_by(Todo.due_date)
         
         return session.scalars(sql_statement).all()
 
