@@ -363,19 +363,44 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
     elif user_choice == "no":
 
+        # Get the user Telegram id
+        user_telegram_id: int = update.effective_user.id
+
         # If there is the todo_data dictionary
         if todo_data := context.user_data.pop("todo_data"):
                 
             # If the todo is correctly saved
-            if save_todo(todo_data=todo_data):
-                user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do without reminder saved correctly."
+            if todo_id := save_todo(todo_data=todo_data):
+                user_text = (
+                    f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do without reminder saved correctly.\n"
+                    "You'll be reminded at the to-do specified time."
+                )
+
+                # Set the todo job name
+                todo_job_name: str = f"todo_user_job_{todo_id.hex}"
+
+                # Prepare the PTB job data (for the reminder at todo specified date)
+                todo_job_data: dict = {
+                    "callback": remind_user_job,
+                    "name": todo_job_name,
+                    "when": todo_data["due_date"],
+                    "data": todo_id,
+                    "chat_id": user_telegram_id,
+                    "user_id": user_telegram_id
+                }
+
+                # Get the job queue
+                job_queue = context.job_queue
+
+                # Run the todo job
+                job_queue.run_once(**todo_job_data)
 
             await update.message.reply_text(
                 text=user_text,
                 reply_markup=ReplyKeyboardRemove()
             )
 
-            return ConversationHandler.END
+    return ConversationHandler.END
     
 
 async def handle_wrong_user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -455,11 +480,34 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
         # If the todo is correctly saved
         if todo_id := save_todo(todo_data=todo_data):
 
-            # Set the job name
-            reminder_job_name: str = f"remind_user_job_{todo_id.hex}"
+            # Get the job queue
+            job_queue = context.job_queue
 
             # Get the user Telegram id
             user_telegram_id: int = update.effective_user.id
+
+            # Set the todo job name
+            todo_job_name: str = f"todo_user_job_{todo_id.hex}"
+
+            # If the todo job is not already in the jobs queue
+            # (because the user choose a reminder)
+            if not (job_queue.get_jobs_by_name(name=todo_job_name)):
+
+                # Prepare the PTB job data (for the reminder at todo specified date)
+                todo_job_data: dict = {
+                    "callback": remind_user_job,
+                    "name": todo_job_name,
+                    "when": todo_data["due_date"],
+                    "data": todo_id,
+                    "chat_id": user_telegram_id,
+                    "user_id": user_telegram_id
+                }
+
+                # Run the todo job
+                job_queue.run_once(**todo_job_data)
+            
+            # Set the job name
+            reminder_job_name: str = f"remind_user_job_{todo_id.hex}"
 
             # Prepare the PTB job data (for the reminder before the todo)
             reminder_job_data: dict = {
@@ -470,29 +518,12 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
                 "chat_id": user_telegram_id,
                 "user_id": user_telegram_id
             }
-
-            # Set the job name
-            todo_job_name: str = f"todo_user_job_{todo_id.hex}"
-
-            # Prepare the PTB job data (for the reminder at todo specified date)
-            todo_job_data: dict = {
-                "callback": remind_user_job,
-                "name": todo_job_name,
-                "when": todo_data["due_date"],
-                "data": todo_id,
-                "chat_id": user_telegram_id,
-                "user_id": user_telegram_id
-            }
-
-            # Get the job queue
-            job_queue = context.job_queue
             
-            # Schedule the jobs to run
+            # Schedule the job to run
             reminder_job = job_queue.run_once(**reminder_job_data)
-            todo_job = job_queue.run_once(**todo_job_data)
 
-            # If the jobs have been correctly added to the queue
-            if reminder_job and todo_job:
+            # If the job have been correctly added to the queue
+            if reminder_job:
 
                 # Prepare the reminder data
                 reminder_data: dict = {
