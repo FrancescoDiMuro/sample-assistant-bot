@@ -24,12 +24,10 @@ class User(Base):
     # Thanks to these variables, we can access the specified models
     # through this (User) model
     location = relationship("Location", back_populates="user", lazy="joined", uselist=False)
-    todos = relationship("Todo", back_populates="user")
+    todos = relationship("Todo", back_populates="user", lazy="joined")
 
 
     @hybrid_property
     def has_location(self):
 
         return self.location is not None
-
-
