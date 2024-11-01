@@ -22,7 +22,8 @@ async def open_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
         user_due_date: datetime = todo.due_date + timedelta(seconds=todo.utc_offset)
 
         user_text = (
-            f"<b>Todo details</b>:\n" 
+            f"<b>{Emoji.MEMO} Todo:</b>\n"
+            f"<b>Details</b>:\n" 
             f"<code>{todo.details}</code>\n"
             f"<b>Due to:</b> {user_due_date:%Y-%m-%d %H:%M}\n"
         )
@@ -30,7 +31,7 @@ async def open_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # If there's a reminder, then add more information
         if todo.reminder:
             user_reminder_date: datetime = todo.reminder.remind_at + timedelta(seconds=todo.utc_offset)
-            user_text += f"Reminder: {user_reminder_date:%Y-%m-%d %H:%M}"
+            user_text += f"<b>Reminder:</b> {user_reminder_date:%Y-%m-%d %H:%M}"
 
         # Create the keyboard for the todo
         keyboard = [
