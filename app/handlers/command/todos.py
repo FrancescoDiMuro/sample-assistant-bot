@@ -70,7 +70,7 @@ async def todos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(
                 text=user_text,
                 reply_markup=todos_inline_keyboard
-            )
+        )
 
 todos_handler = CommandHandler(
     command="todos",
