@@ -1,6 +1,6 @@
-from app.models.reminder.crud.delete import delete_reminder
 from constants.emoji import Emoji
 from datetime import UTC, datetime, timedelta
+from models.reminder.crud.delete import delete_reminder
 from models.todo.crud.retrieve import retrieve_todo, retrieve_todos
 from models.todo.crud.delete import delete_todo
 from models.todo.crud.update import update_todo
@@ -74,7 +74,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
 
                     # User text
                     user_text = (
-                        f"To-Do checked as completed on "
+                        f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do ({todo.details}) checked as completed on "
                         f"{todo_completed_time:%Y-%m-%d %H:%M}"
                     )
                     
@@ -86,8 +86,9 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
         case "delete":
             
             # Here we need to delete:
-            # - the to-do (and associated reminder)
-            # - the pending to-do
+            # - the to-do (and associated reminder, if present)
+            # - the pending to-do (used to be completed with a message reaction)
+
             # Transform the todo_id as a UUID (because it was a string)
             todo_id = todo_id = UUID(hex=todo_info, version=4)
 
