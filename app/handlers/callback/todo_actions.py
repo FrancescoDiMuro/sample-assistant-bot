@@ -9,6 +9,8 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import CallbackQueryHandler, ContextTypes
 from uuid import UUID
 
+# TODO: centralize todos list creation (it's redundant)
+
 
 async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
@@ -123,7 +125,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
 
                 # User text
                 user_text = (
-                    f"To-Do ({todo.details}) deleted on "
+                    f"{Emoji.CROSS_MARK} To-Do ({todo.details}) deleted on "
                     f"{todo_deletion_time:%Y-%m-%d %H:%M}"
                 )
 
