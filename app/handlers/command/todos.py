@@ -63,14 +63,16 @@ async def todos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 f"{Emoji.OPEN_BOOK} To-dos list:"
             )
 
+            await update.message.reply_text(
+                    text=user_text,
+                    reply_markup=todos_inline_keyboard
+            )
+
         else:
 
             user_text = f"{Emoji.PERSON_SHRUGGING} There are no to-dos!"
 
-        await update.message.reply_text(
-                text=user_text,
-                reply_markup=todos_inline_keyboard
-        )
+            await update.message.reply_text(text=user_text)
 
 todos_handler = CommandHandler(
     command="todos",
