@@ -3,7 +3,7 @@ from constants.emoji import Emoji
 from models.location.crud.create import create_location
 from models.location.crud.update import update_location
 from models.user.crud.retrieve import retrieve_user
-from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, User
+from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update
 from telegram.ext import (
     ApplicationHandlerStop, 
     ContextTypes, 
@@ -47,8 +47,8 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
 
             # Set the keyboard buttons
             keyboard = [
-                [KeyboardButton(text=f"Yes")],
-                [KeyboardButton(text=f"No")]
+                [KeyboardButton(text="Yes")],
+                [KeyboardButton(text="No")]
             ]
             
             # Create the keyboard

@@ -1,9 +1,7 @@
 from calendar import Calendar, day_abbr, MONDAY, month_abbr
 from datetime import datetime
 from itertools import batched
-from re import search
-
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 
 def get_formatted_month_weeks(year: int | None = None, month: int | None= None):

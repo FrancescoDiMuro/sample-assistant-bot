@@ -12,9 +12,6 @@ def update_location(location_id: UUID, location_data: dict) -> UUID:
     # all the operations in the context manager
     with SessionLocal() as session:
 
-        # Get the record
-        location = session.get(entity=Location, ident=location_id)
-
         # Update location data
         sql_statement: Update = update(Location) \
                                 .where(Location.id == location_id) \
