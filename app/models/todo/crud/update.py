@@ -12,9 +12,6 @@ def update_todo(todo_id: UUID, todo_data: dict) -> UUID:
     # all the operations in the context manager
     with SessionLocal() as session:
 
-        # Get the record
-        todo = session.get(entity=Todo, ident=todo_id)
-
         # Update todo data
         sql_statement: Update = update(Todo) \
                                 .where(Todo.id == todo_id) \

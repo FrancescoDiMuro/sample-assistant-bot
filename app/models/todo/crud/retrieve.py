@@ -1,15 +1,22 @@
-from uuid import UUID
 from database.db import SessionLocal
 from models.todo.todo import Todo
-from sqlalchemy import Select, select
+from models.user.user import User
+from sqlalchemy import Select, and_, select
+from uuid import UUID
 
 
-def retrieve_todos() -> Todo | None:
+def retrieve_todos(user_id: UUID, is_done: bool = False) -> Todo | None:
 
     with SessionLocal() as session:
 
         sql_statement: Select = select(Todo) \
-                                .where(Todo.done.is_(False))
+                                .where(
+                                    and_(
+                                        Todo.user.has(User.id == user_id),
+                                        Todo.done.is_(is_done)
+                                    )
+                                ) \
+                                .order_by(Todo.due_date)
         
         return session.scalars(sql_statement).all()
 

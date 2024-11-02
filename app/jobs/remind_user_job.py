@@ -45,7 +45,7 @@ async def remind_user_job(context: ContextTypes.DEFAULT_TYPE):
         # Here we are using the bot_data dictionary instead of
         # the user_data one, since it's not available.
         # So, in order to keep all the data split for each user,
-        # we have to created a dictionary in the bot_data one
+        # we have to create a dictionary in the bot_data one
         # for every user, using its telegram id as a key for
         # another inner dictionary, which contains other information.
         # This if avoids another declaration for the inner dictionary

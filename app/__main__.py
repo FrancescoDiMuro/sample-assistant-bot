@@ -1,5 +1,8 @@
 from dotenv import load_dotenv
+from handlers.callback.todo_actions import todo_actions_handler
+from handlers.callback.todo_details import todo_details_handler
 from handlers.command.news import news_handler
+from handlers.command.todos import todos_handler
 from handlers.command.weather import weather_handler
 from handlers.conversation.start import start_handler
 from handlers.conversation.set_location import set_location_handler
@@ -31,6 +34,12 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
         .build()
     
     
+    # ----------  (callback) ----------
+    app.add_handler(handler=todo_details_handler)
+
+    # ----------  (callback) ----------
+    app.add_handler(handler=todo_actions_handler)
+    
     # ---------- (message reaction) ----------
     app.add_handler(handler=message_reaction_handler)
     
@@ -45,6 +54,9 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
 
     # ---------- /todo (conversation) ----------
     app.add_handler(handler=create_todo_handler)
+
+    # ---------- /todos (command) ----------
+    app.add_handler(handler=todos_handler)
 
     # ---------- /weather (command) ----------
     app.add_handler(handler=weather_handler)
