@@ -9,7 +9,7 @@ from telegram.ext import ContextTypes, CommandHandler
 async def todos(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Send chat action to inform the user that there's a process ongoing
-    context.bot.send_chat_action(
+    await context.bot.send_chat_action(
         chat_id=update.effective_chat.id,
         action=ChatAction.TYPING
     )
