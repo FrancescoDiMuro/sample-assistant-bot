@@ -12,9 +12,8 @@ from uuid import UUID
 
 async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
-    # Get the callback query and answer it
+    # Get the callback query
     query = update.callback_query
-    await query.answer()
 
     # Get the user Telegram id
     user_telegram_id: int = query.from_user.id
@@ -27,6 +26,9 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
     match todo_action:
 
         case "done":
+
+            # Answer the query
+            await query.answer()
             
             # Transform the todo_id as a UUID (because it was a string)
             todo_id = todo_id = UUID(hex=todo_info, version=4)
@@ -95,6 +97,9 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
             # Get the todo
             if todo := retrieve_todo(todo_id=todo_id):
 
+                # Answer the query
+                await query.answer()
+
                 # Get the user UTC offset
                 user_utc_offset = todo.utc_offset
 
@@ -129,13 +134,21 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
 
                 # Delete the to-do
                 delete_todo(todo_id=todo_id)
-            
-            await context.bot.send_message(
-                chat_id=update.effective_user.id,
-                text=user_text
-            )
+
+                await context.bot.send_message(
+                    chat_id=update.effective_user.id,
+                    text=user_text
+                )
+
+            else:
+                await query.answer("You've already deleted this Todo!")
+
+                await query.delete_message()
 
         case "go_back":
+
+            # Answer the query
+            await query.answer()
                     
             # Create the todos inline keyboard
             todos_inline_keyboard = await create_todos_keyboard(user_telegram_id=user_telegram_id)
