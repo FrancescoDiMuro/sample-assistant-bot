@@ -70,7 +70,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
                     # NOTE: here I'm using a custom version of "get_jobs_by_name" function,
                     # that supports searching the jobs through regular expressions
                     # For each job that has the todo_id, disable it and remove it
-                    for job in context.job_queue.get_jobs_by_name(name=todo_id.hex, use_regex=True):
+                    for job in context.job_queue.get_jobs_by_name(name=f".*{todo_id.hex}"):
                         job.enabled = False
                         job.schedule_removal()
 
@@ -119,7 +119,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
                 # NOTE: here I'm using a custom version of "get_jobs_by_name" function,
                 # that supports searching the jobs through regular expressions
                 # For each job that has the todo_id, disable it and remove it
-                for job in context.job_queue.get_jobs_by_name(name=todo_id.hex, use_regex=True):
+                for job in context.job_queue.get_jobs_by_name(name=f".*{todo_id.hex}"):
                     job.enabled = False
                     job.schedule_removal()
 
