@@ -18,9 +18,12 @@ async def mark_todo_as_done(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_telegram_id = message_reaction_updated.user.id
 
     # Guards
-    if not (user_data := context.bot_data.get(user_telegram_id)): raise ApplicationHandlerStop()
-    if not (pending_todos := user_data.get("pending_todos")): raise ApplicationHandlerStop()
-    if message_id not in pending_todos.keys(): raise ApplicationHandlerStop()
+    if not (user_data := context.bot_data.get(user_telegram_id)):
+        raise ApplicationHandlerStop()
+    if not (pending_todos := user_data.get("pending_todos")):
+        raise ApplicationHandlerStop()
+    if message_id not in pending_todos.keys(): 
+        raise ApplicationHandlerStop()
 
     # If there's a todo_id assigned to the specified message
     if todo_id := pending_todos.get(message_id):
@@ -36,7 +39,7 @@ async def mark_todo_as_done(update: Update, context: ContextTypes.DEFAULT_TYPE):
             
                 # If the to-do is not in the state of "done",
                 # and the user's reaction to the todo-reminder is a "thumbs-up"
-                if todo.done == False and emoji == Emoji.THUMBS_UP_SIGN:
+                if (not todo.done) and emoji == Emoji.THUMBS_UP_SIGN:
 
                     # Prepare the data to update
                     todo_data: dict = {

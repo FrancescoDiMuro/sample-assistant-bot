@@ -48,7 +48,7 @@ async def open_todo_details(update: Update, context: ContextTypes.DEFAULT_TYPE):
             [
                 InlineKeyboardButton(
                     text=f"{Emoji.LEFTWARDS_BLACK_ARROW} Todos",
-                    callback_data=f"todo_go_back:"
+                    callback_data="todo_go_back:"
                 )
             ]
         ]
