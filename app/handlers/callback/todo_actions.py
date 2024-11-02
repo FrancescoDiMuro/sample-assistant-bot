@@ -1,15 +1,13 @@
 from constants.emoji import Emoji
 from datetime import UTC, datetime, timedelta
+from handlers.callback.keyboards.todos import create_todos_keyboard
 from models.reminder.crud.delete import delete_reminder
-from models.todo.crud.retrieve import retrieve_todo, retrieve_todos
+from models.todo.crud.retrieve import retrieve_todo
 from models.todo.crud.delete import delete_todo
 from models.todo.crud.update import update_todo
-from models.user.crud.retrieve import retrieve_user
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
+from telegram import Update
 from telegram.ext import CallbackQueryHandler, ContextTypes
 from uuid import UUID
-
-# TODO: centralize todos list creation (it's redundant)
 
 
 async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -138,67 +136,25 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
             )
 
         case "go_back":
-            
-            # Retrieve the user
-            if user := retrieve_user(user_telegram_id=update.effective_user.id):
+                    
+            # Create the todos inline keyboard
+            todos_inline_keyboard = await create_todos_keyboard(user_telegram_id=user_telegram_id)
 
-                # Get the uncompleted list of user's todos
-                if user_uncompleted_todos := retrieve_todos(user_id=user.id, is_done=False):
+            # If the keyboard has been correctly created (and so, there is at least a todo)
+            if todos_inline_keyboard:
 
-                    # Prepare the keyboard for the todos list
-                    keyboard: list = [
-                        [
-                            InlineKeyboardButton(
-                                text=f"{Emoji.CALENDAR} Due to", 
-                                callback_data="placeholder"
-                            ),
-                            InlineKeyboardButton(
-                                text=f"{Emoji.OPEN_BOOK} Details", 
-                                callback_data="placeholder"
-                            ),
-                        ]
-                    ]
+                user_text = f"{Emoji.OPEN_BOOK} To-dos list:"
 
-                    # Create the list of todos (details) for the inline keyboard
-                    for todo in user_uncompleted_todos:
+                await query.edit_message_text(
+                    text=user_text,
+                    reply_markup=todos_inline_keyboard
+                )
 
-                        # Set the todo user due date
-                        todo_user_due_date: datetime = \
-                            f"{todo.due_date + timedelta(seconds=todo.utc_offset):%Y-%m-%d %H:%M}"
-                        
-                        # Add the todo information to the keyboard
-                        keyboard.append(
-                            [
-                                InlineKeyboardButton(
-                                    text=todo_user_due_date, 
-                                    callback_data="placeholder"
-                                ),
-                                InlineKeyboardButton(
-                                    text=todo.details, 
-                                    callback_data=f"todo_details:{todo.id.hex}"
-                                )
-                            ]
-                        )
-                            
-                    # Create the keyboard
-                    todos_inline_keyboard = InlineKeyboardMarkup(
-                        inline_keyboard=keyboard,
-                    )
+            else:
 
-                    user_text = (
-                        f"{Emoji.OPEN_BOOK} To-dos list:"
-                    )
+                user_text = f"{Emoji.PERSON_SHRUGGING} There are no to-dos!"
 
-                    await query.edit_message_text(
-                        text=user_text,
-                        reply_markup=todos_inline_keyboard
-                    )
-
-                else:
-
-                    user_text = f"{Emoji.PERSON_SHRUGGING} There are no to-dos!"
-
-                    await query.edit_message_text(text=user_text)
+                await query.edit_message_text(text=user_text)
 
 
 # Create the handler
