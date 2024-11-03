@@ -217,7 +217,7 @@ async def input_todo_due_time(update: Update, context: ContextTypes.DEFAULT_TYPE
     if user_tzinfo and utc_offset:
 
         # Convert the naive datetime in an aware datetime in the user tzinfo
-        due_dt = due_dt.astimezone(user_tzinfo)
+        due_dt = due_dt.replace(tzinfo=user_tzinfo)
 
         # Get the current time in UTC format
         utc_current_time = datetime.now(tz=UTC)
