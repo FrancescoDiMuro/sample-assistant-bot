@@ -9,12 +9,27 @@ load_dotenv()
 
 # Get the specified .env variables
 DB_DIALECT: str = getenv("DB_DIALECT")
+DB_DRIVER: str = getenv("DB_DRIVER")
+DB_USERNAME: str = getenv("DB_USERNAME")
+DB_PASSWORD: str = getenv("DB_PASSWORD")
+DB_HOST: str = getenv("DB_HOST")
+DB_PORT: str = getenv("DB_PORT")
 DB_DATABASE: str = getenv("DB_DATABASE")
 CREATE_MODELS: bool = getenv("CREATE_MODELS") == "True"
 DEBUG: bool = getenv("DEBUG") == "True"
 
-# Compose the DB URL (the connection string)
-DB_URL: str = f"{DB_DIALECT}:///{DB_DATABASE}"
+# Compose the DB URL (the connection string),
+# depending on the DB_DIALECT
+match DB_DIALECT:
+
+    case "sqlite":
+        DB_URL: str = f"{DB_DIALECT}:///{DB_DATABASE}"
+    
+    case "postgresql":
+        DB_URL: str = (
+            f"{DB_DIALECT}+{DB_DRIVER}://{DB_USERNAME}:{DB_PASSWORD}"
+            f"@{DB_HOST}:{DB_PORT}/{DB_DATABASE}"
+        )
 
 # Create the engine (and the database if it doesn't exist)
 db_engine: Engine = create_engine(url=DB_URL, echo=DEBUG)
