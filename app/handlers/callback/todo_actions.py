@@ -1,6 +1,7 @@
 from constants.emoji import Emoji
 from datetime import UTC, datetime, timedelta
 from handlers.callback.keyboards.todos import create_todos_keyboard
+from jobs.utils import get_jobs_by_name_custom
 from models.reminder.crud.delete import delete_reminder
 from models.todo.crud.retrieve import retrieve_todo
 from models.todo.crud.delete import delete_todo
@@ -70,7 +71,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
                     # NOTE: here I'm using a custom version of "get_jobs_by_name" function,
                     # that supports searching the jobs through regular expressions
                     # For each job that has the todo_id, disable it and remove it
-                    for job in context.job_queue.get_jobs_by_name(name=f".*{todo_id.hex}"):
+                    for job in await get_jobs_by_name_custom(context=context, name=f".*{todo_id.hex}"):
                         job.enabled = False
                         job.schedule_removal()
 
@@ -119,7 +120,7 @@ async def handle_todo_actions(update: Update, context: ContextTypes.DEFAULT_TYPE
                 # NOTE: here I'm using a custom version of "get_jobs_by_name" function,
                 # that supports searching the jobs through regular expressions
                 # For each job that has the todo_id, disable it and remove it
-                for job in context.job_queue.get_jobs_by_name(name=f".*{todo_id.hex}"):
+                for job in await get_jobs_by_name_custom(context=context, name=f".*{todo_id.hex}"):
                     job.enabled = False
                     job.schedule_removal()
 
