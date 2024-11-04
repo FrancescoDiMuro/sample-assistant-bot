@@ -1,0 +1,29 @@
+name: sample-assistant-bot
+
+services:
+  app:
+    container_name: app
+    build: .
+    depends_on:
+      db:
+        condition: service_healthy
+        
+  db:
+    container_name: db
+    environment:
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_DATABASE}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    hostname: db
+    image: postgres
+    restart: always
+    volumes: 
+      - bot-data:/var/lib/postgresql/data
+
+volumes:
+  bot-data:
