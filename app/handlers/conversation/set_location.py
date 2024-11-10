@@ -68,8 +68,10 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
         
         else:
 
-            user_text = "Click on the button below to set your location\n"
-            "(or use the /cancel command to cancel this operation):"
+            user_text = (
+                "Click on the button below to set your location\n"
+                "(or use the /cancel command to cancel this operation):"
+            )
 
             # Set the keyboard buttons
             keyboard = [
