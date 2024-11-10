@@ -218,6 +218,19 @@ async def input_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                     reply_markup=ReplyKeyboardRemove()
                 )
 
+                # Inform the user on what it can do
+                user_text = (
+                    f"{Emoji.PERSON_RAISING_BOTH_HANDS_IN_CELEBRATION}"and
+                    "Now you can explore the functionalities of this bot.\n"
+                    "Let me give you a hint:\n"
+                    "- press /news to see the latest local news\n"
+                    "- press /todo to create a new to-do"
+                    "- press /todos to see all you saved to-dos"
+                    "- press /weather to check the weather at your location"
+                )
+
+                await update.message.reply_text(text=user_text)
+
     return ConversationHandler.END
 
 

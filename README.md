@@ -16,8 +16,8 @@ The purpose of the bot is to provide the user a set of functionalities that it c
 
 The user can interact accomplish these actions thanks to a set of commands, like:
 - [`/help`](#help), to guide the user using the bot
-- [`/location`](#location), to let the user manage its location
 - [`/news`](#news), to read the latest local news (based on user's location)
+- [`/setlocation`](#setlocation), to let the user set (and save) its location to the database
 - [`/todo`](#todo), to create a todo (with optional reminder)
 - [`/todos`](#todos), to list, check or remove user's todos
 - [`/weather`](#weather), to show the current weather (based on user's location)
@@ -38,14 +38,14 @@ By typing `/help <command>`, the user receives a specific guide on how to use th
 
 [INSERT IMAGES HERE]
 
-### `/location`
-With this command, the user can manage its location data, by setting, updating or removing it from the bot database.
-
-[INSERT IMAGES HERE]
-
 ### `/news`
 With this command, the user receives a set of local news based on the user's location.<br>
 Please note that without setting a location, this command is unable to provide the expected result.
+
+[INSERT IMAGES HERE]
+
+### `/setlocation`
+With this command, the user can save its location to the database.
 
 [INSERT IMAGES HERE]
 
