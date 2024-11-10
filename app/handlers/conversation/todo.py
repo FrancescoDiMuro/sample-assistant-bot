@@ -76,26 +76,40 @@ async def todo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
     
     # Get the user from db
     if user := retrieve_user(user_telegram_id=user_telegram_id):
+
+        # If the user has a location associated
+        if user.location:
         
-        # Save the user id in the context user data dictionary
-        context.user_data["todo_data"]["user_id"] = user.id
+            # Save the user id in the context user data dictionary
+            context.user_data["todo_data"]["user_id"] = user.id
 
-        user_text = (
-            f"{Emoji.SQUARED_NEW} You are creating a new To-Do.\n"
-            "You can always cancel this operation using the /cancel command.\n"
-            "Tell me some details about it:"
-        )
+            user_text = (
+                f"{Emoji.SQUARED_NEW} You are creating a new To-Do.\n"
+                "You can always cancel this operation using the /cancel command.\n"
+                "Tell me some details about it:"
+            )
 
-        await update.message.reply_text(text=user_text)
+            await update.message.reply_text(text=user_text)
 
-        # Next step
-        return INPUT_TODO_DETAILS
+            # Next step
+            return INPUT_TODO_DETAILS
+        
+        else:
+
+            user_text = (
+                f"{Emoji.CROSS_MARK} It seems that you didn't set a location.\n"
+                "In order to use this command, you must set a location."
+            )
+
+            await update.message.reply_text(text=user_text)
+
+            return ConversationHandler.END
     
     else:
 
         user_text = (
-            f"{Emoji.CROSS_MARK} User not found!\n"
-            "Are you sure that you signed-up?"
+                f"{Emoji.CROSS_MARK} It seems that you didn't sign-up.\n"
+                "In order to use this command, you must sign-up."
         )
 
         await update.message.reply_text(text=user_text)
@@ -679,11 +693,6 @@ create_todo_handler = ConversationHandler(
                 & ~filters.Regex(r"^\/cancel$"),
                 callback=select_reminder_time
             ),
-            # MessageHandler(
-            #     filters=filters.TEXT 
-            #     & ~filters.Regex(r"^\/cancel$"),
-            #     callback=handle_wrong_reminder_time
-            # )
         ]
     },
     fallbacks=[
