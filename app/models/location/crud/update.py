@@ -17,4 +17,8 @@ def update_location(location_id: UUID, location_data: dict) -> UUID:
                                 .where(Location.id == location_id) \
                                 .values(**location_data)
         
-        return session.execute(sql_statement)
+        session.execute(sql_statement)
+
+        session.commit()
+
+        return location_id
