@@ -1,13 +1,13 @@
 from __future__ import annotations
 from constants.emoji import Emoji
 from constants.wmo_codes import WMO_CODES
+from math import ceil
 from models.user.crud.retrieve import retrieve_user
 from telegram import Update
 from telegram.ext import ContextTypes, CommandHandler
-
 import requests
 
-# Entry point
+
 async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Check if the user exists
@@ -30,10 +30,21 @@ async def weather(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
                 data=location_data,
                 chat_id=update.message.chat_id
             )
+
+        else:
+
+            user_text = (
+                f"{Emoji.CROSS_MARK} It seems that you didn't set a location.\n"
+                "In order to use this command, you must set a location."
+            )
+
+            await update.message.reply_text(text=user_text)
             
 
 async def get_weather_info_job(context: ContextTypes.DEFAULT_TYPE) -> None: 
 
+    user_text: str = f"{Emoji.SUN_BEHIND_SMALL_CLOUD} <b>Weather</b>\n\n"
+    
     # Get the location data from the job data
     location_data: dict = context.job.data
 
@@ -47,7 +58,7 @@ async def get_weather_info_job(context: ContextTypes.DEFAULT_TYPE) -> None:
         formatted_weather_info: dict = await format_weather_info(response_body=weather_info)
 
         # User text
-        user_text = "\n".join(
+        user_text += "\n".join(
             [f"{k}: {v}" for k,v in formatted_weather_info.items()]
         )
 
@@ -116,38 +127,31 @@ async def format_weather_info(response_body: dict) -> dict:
     variables: list = [
         {
             "display_name": "Summary",
-            "variable_name": "weather_code",
-            "emoji": Emoji.OPEN_BOOK,
+            "variable_name": "weather_code"
         },
         {
             "display_name": "Temperature",
-            "variable_name": "temperature_2m",
-            "emoji": Emoji.THERMOMETER
+            "variable_name": "temperature_2m"
         },
         {
             "display_name": "Relative Humidity",
-            "variable_name": "relative_humidity_2m",
-            "emoji": Emoji.SPLASHING_SWEAT_SYMBOL
+            "variable_name": "relative_humidity_2m"
         },
         {
             "display_name": "Feels like",
-            "variable_name": "apparent_temperature",
-            "emoji": Emoji.FACE_MASSAGE
+            "variable_name": "apparent_temperature"
         },
         {
             "display_name": "Day/Night",
-            "variable_name": "is_day",
-            "emoji": "",
+            "variable_name": "is_day"
         },
         {
             "display_name": "Cloud Cover",
-            "variable_name": "cloud_cover",
-            "emoji": Emoji.CLOUD
+            "variable_name": "cloud_cover"
         },
         {
             "display_name": "Wind Speed",
-            "variable_name": "wind_speed_10m",
-            "emoji": Emoji.WIND_FACE
+            "variable_name": "wind_speed_10m"
         }
     ]
 
@@ -165,18 +169,15 @@ async def format_weather_info(response_body: dict) -> dict:
         # Get the display name and the variable name
         display_name = d.get("display_name")
         variable_name = d.get("variable_name")
-        variable_emoji = d.get("emoji")
 
-        # Get the variable value and the variable unit
-        variable_value = current_values.get(variable_name)
+        # Get the variable value (ceiled) and the variable unit
+        variable_value = ceil(current_values.get(variable_name))
         variable_unit = current_units.get(variable_name)
 
         # Tuning variable values
         if variable_name == "is_day":
             current_variable_value = variable_value
             variable_value = "Day" if current_variable_value == 1 else "Night"
-            variable_emoji = Emoji.BLACK_SUN_WITH_RAYS if current_variable_value == 1 \
-                else Emoji.NEW_MOON_SYMBOL 
 
         # Get the detailed info about weather code
         # and reset variable unit
@@ -185,7 +186,7 @@ async def format_weather_info(response_body: dict) -> dict:
             variable_unit = ""
 
         # Create the key for the dictionary
-        key = f"{variable_emoji} {display_name}"
+        key = f"{display_name}"
 
         # Save the information in the weather info dictionary
         weather_info[key] = f"{variable_value} {variable_unit}"
