@@ -1,6 +1,5 @@
 from __future__ import annotations
 from constants.emoji import Emoji
-from models.location.crud.create import create_location
 from models.user.crud.create import create_user
 from models.user.crud.retrieve import retrieve_user
 from telegram import KeyboardButton, ReplyKeyboardMarkup, ReplyKeyboardRemove, Update, User
@@ -17,7 +16,7 @@ from warnings import filterwarnings
 
 
 # Conversation Handler steps
-USER_CHOICE, INPUT_LOCATION = range(2)
+USER_CHOICE = 0
 
 
 # Entry point
@@ -127,19 +126,16 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
             user_text = (
                 f"{Emoji.WHITE_HEAVY_CHECK_MARK} You accepted to share your information.\n"
-                "Your public information (first name, last name, username, Telegram id) have been saved.\n"
-                "Now, send me your location clicking on "
-                f"{Emoji.PAPERCLIP} button {Emoji.RIGHTWARD_ARROW} Location,\n"
-                "or use the /skip command to don't set your location now."
+                "Now, send me your location using the /setlocation command. "
             )
 
-        await update.message.reply_text(
-            text=user_text,
-            reply_markup=ReplyKeyboardRemove()
-        )
+            await update.message.reply_text(
+                text=user_text,
+                reply_markup=ReplyKeyboardRemove()
+            )
 
-        # Move to the next Conversation Handler step
-        return INPUT_LOCATION
+            # End the conversation
+            return ConversationHandler.END
         
     elif user_choice_message == "no":
 
@@ -169,50 +165,6 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
         # Return to this step
         return USER_CHOICE
-
-
-async def input_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-
-    # Get the latitude and longitude from the message
-    latitude = update.message.location.latitude
-    longitude = update.message.location.longitude
-
-    # If the location is correctly obtained
-    if latitude and longitude:
-
-        # Get (and delete) the user id from its context user_data's dictionary
-        user_id = context.user_data.pop("user_id")
-
-        # Set the location data
-        location_data = {
-            "user_id": user_id,
-            "latitude": latitude,
-            "longitude": longitude
-        }
-        
-        # Save the user's location in the db
-        location_id = create_location(location_data=location_data)
-
-        # Check if the location has been correctly created
-        if location_id:
-
-            user_text = f"{Emoji.WHITE_HEAVY_CHECK_MARK} Your data has been correctly saved."
-
-            await update.message.reply_text(text=user_text)
-
-    return ConversationHandler.END
-
-
-async def skip_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
-
-    user_text: str = (
-        f"{Emoji.RUNNER} Location skipped.\n"
-        "You can always set it up later with the command /setlocation."
-    )
-
-    await update.message.reply_text(text=user_text)
-
-    return ConversationHandler.END
 
 
 async def cancel(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -264,10 +216,6 @@ start_handler = ConversationHandler(
     states={
         USER_CHOICE: [
             MessageHandler(filters=filters.TEXT, callback=user_choice)
-        ],
-        INPUT_LOCATION: [
-            MessageHandler(filters=filters.LOCATION, callback=input_location),
-            CommandHandler(command="skip", callback=skip_location)
         ]
     },
     fallbacks=[
