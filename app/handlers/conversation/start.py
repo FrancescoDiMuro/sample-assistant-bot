@@ -97,7 +97,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             user_text = (
                 f"{Emoji.THINKING_FACE} It seems that you still didn't set a location.\n"
-                "If you want to use location related commands, remember to set it through the command /setocation."
+                "If you want to use location related commands, remember to set it through the command /setlocation."
             )
 
             await update.message.reply_text(text=user_text)
