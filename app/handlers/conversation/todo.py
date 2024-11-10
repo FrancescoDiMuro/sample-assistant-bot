@@ -387,7 +387,8 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
             if todo_id := save_todo(todo_data=todo_data):
                 user_text = (
                     f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do without reminder saved correctly.\n"
-                    "You'll be reminded at the to-do specified time."
+                    "You'll be reminded at the to-do specified time.\n"
+                    "Press on the /todo command if you want to add another to-do."
                 )
 
                 # Set the todo job name
@@ -553,7 +554,8 @@ async def select_reminder_time(update: Update, context: ContextTypes.DEFAULT_TYP
                         f"{Emoji.WHITE_HEAVY_CHECK_MARK} To-Do with reminder saved correctly.\n"
                         "You'll be notified at the specified reminder time, and, if the to-do "
                         "will not be marked as 'done', you'll be reminded a second time at the "
-                        "to-do specified time."
+                        "to-do specified time.\n"
+                        "Press on the /todo command if you want to add another to-do."
                     )
 
                     await update.message.reply_text(
