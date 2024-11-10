@@ -24,7 +24,7 @@ class Todo(Base):
     # These are the relationships between other models
     # Thanks to these variables, we can access the specified models
     # through this (Todo) model
-    user = relationship("User", back_populates="todos")
+    user = relationship("User", back_populates="todos", lazy="joined", uselist=False)
     reminder = relationship(
         "Reminder", back_populates="todo", uselist=False, lazy="joined", 
         cascade="all, delete-orphan", single_parent=True
