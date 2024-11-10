@@ -10,7 +10,7 @@ def retrieve_reminders() -> Reminder | None:
 
         sql_statement: Select = select(Reminder)
         
-        return session.scalars(sql_statement).all()
+        return session.scalars(sql_statement).unique().all()
 
 
 def retrieve_reminder(reminder_id: UUID) -> Reminder | None:
