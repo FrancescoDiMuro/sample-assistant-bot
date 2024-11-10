@@ -94,9 +94,11 @@ async def set_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> in
     else:
 
         user_text = (
-            f"{Emoji.CROSS_MARK} User not found!\n"
-            "Are you sure that you signed-up?"
+                f"{Emoji.CROSS_MARK} It seems that you didn't sign-up.\n"
+                "In order to use this command, you must sign-up."
         )
+
+        await update.message.reply_text(text=user_text)
 
         return ConversationHandler.END
     
