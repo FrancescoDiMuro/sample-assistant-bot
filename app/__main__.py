@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 from handlers.callback.todo_actions import todo_actions_handler
 from handlers.callback.todo_details import todo_details_handler
+from handlers.command.help import help_handler
 from handlers.command.news import news_handler
 from handlers.command.todos import todos_handler
 from handlers.command.weather import weather_handler
@@ -42,6 +43,9 @@ if BOT_TOKEN := getenv("BOT_TOKEN"):
     
     # ---------- (message reaction) ----------
     app.add_handler(handler=message_reaction_handler)
+
+    # ---------- /help (command) ----------
+    app.add_handler(handler=help_handler)
     
     # ---------- /news (command) ----------
     app.add_handler(handler=news_handler)

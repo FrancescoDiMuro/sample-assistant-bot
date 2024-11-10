@@ -1,27 +1,10 @@
 # Bot commands visible in the commands menu
-BOT_COMMANDS = [
-    {
-        "command": "/help",
-        "description": "Shows how to use the bot"
-    },
-    {
-        "command": "/news",
-        "description": "Show the news based on the user location"
-    },
-    {
-        "command": "/setlocation",
-        "description": "Set the user location"
-    },
-    {
-        "command": "/todo",
-        "description": "Create a new to-do"
-    },
-    {
-        "command": "/todos",
-        "description": "Show the user's to-dos"
-    },
-    {
-        "command": "/weather",
-        "description": "Show the weather information based on the user location"
-    },
-]
+BOT_COMMANDS: dict = {
+    "/help": "Shows a brief guide on how to use the bot",
+    "/news": "Shows local news based on the user's location",
+    "/setlocation": "Sets/updates the user's location",
+    "/todo": "Creates a new to-do with an optional reminder",
+    "/todos": "Shows the user's uncompleted to-dos",
+    "/weather": "Shows the current weather information based on the user's location"
+}
+    
