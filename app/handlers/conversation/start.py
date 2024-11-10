@@ -37,20 +37,20 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         # User text
         user_text: str = (
             f"Hello {user_first_name} {Emoji.WAVING_HAND_SIGN}\n"
-            f"This is your personal assistant bot {Emoji.ROBOT}\n\n"
+            f"This is Aski, your personal assistant bot {Emoji.ROBOT}\n\n"
             "Before we start, you need to be informed about a couple of things:\n"
-            "1. this bot will store part of the data that is publicly visibile in your Telegram account, "
+            "1. this bot will store part of the data that is publicly available in your Telegram account, "
             "like your first name, last name (if set), your Telegram's username (if set), "
             "and your Telegram's user ID;\n"
-            "2. some commands require your location.\n"
-            "Since this bot is bornt with sample purposes, you don't have to share your <i>actual</i> location,"
-            "but any location to let you use location related commands.\n"
+            "2. all commands require a location.\n"
+            "Since this bot bornt with sample purposes, you don't have to share your <i>actual</i> location,"
+            "but any location, preferably close to you, to let you use the various commands.\n"
             "Whenever you want, you can set another location with the command /setlocation.\n"
             "These information are stored securely, and they are not shared with anybody.\n\n"
             "Since it's the first time you use this bot, you're going to be asked if you want to proceed, "
             "accepting that your data is going to be stored, or to not proceed, "
             "refusing that your data is going to be stored.\n"
-            "In the last case, it's not possible to use the bot, since every command is user "
+            "In case you refuse to continue, it's not going to be possible to use the bot, since every command is user "
             "and location related.\n\n"
             "Do you want to proceed?"
         )
@@ -126,7 +126,7 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
             user_text = (
                 f"{Emoji.WHITE_HEAVY_CHECK_MARK} You accepted to share your information.\n"
-                "Now, send me your location using the /setlocation command. "
+                "Now, send me your location using the /setlocation command."
             )
 
             await update.message.reply_text(
