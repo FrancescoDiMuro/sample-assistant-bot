@@ -43,7 +43,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
             "like your first name, last name (if set), your Telegram's username (if set), "
             "and your Telegram's user ID;\n"
             "2. all commands require a location.\n"
-            "Since this bot bornt with sample purposes, you don't have to share your <i>actual</i> location,"
+            "Since this bot bornt with sample purposes, you don't have to share your <i>actual</i> location, "
             "but any location, preferably close to you, to let you use the various commands.\n"
             "Whenever you want, you can set another location with the command /setlocation.\n"
             "These information are stored securely, and they are not shared with anybody.\n\n"
@@ -97,7 +97,7 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
             user_text = (
                 f"{Emoji.THINKING_FACE} It seems that you still didn't set a location.\n"
-                "If you want to use location related commands, remember to set it through the command /setlocation."
+                "If you want to use location related commands, remember to set it through the provided command /setlocation."
             )
 
             await update.message.reply_text(text=user_text)
@@ -126,7 +126,7 @@ async def user_choice(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int
 
             user_text = (
                 f"{Emoji.WHITE_HEAVY_CHECK_MARK} You accepted to share your information.\n"
-                "Now, send me your location using the /setlocation command."
+                "Now, send me your location using the provided /setlocation command."
             )
 
             await update.message.reply_text(
