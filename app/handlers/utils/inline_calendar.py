@@ -109,7 +109,10 @@ def create_calendar(year: int | None = None, month: int | None= None):
             # Append the day button to the row
             week_row.append(day_button)
 
-        # Append the week row to the calendar keyboard
-        calendar_keyboard.append(week_row)
+        # If there is at least one button that is not a placeholder
+        if any([button.callback_data != "placeholder" for button in week_row]):
+
+            # Append the week row to the calendar keyboard
+            calendar_keyboard.append(week_row)
 
     return InlineKeyboardMarkup(inline_keyboard=calendar_keyboard)
