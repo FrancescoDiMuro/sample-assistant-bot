@@ -1,17 +1,23 @@
 # Sample Assistant Bot
 
+## Summary
+- [Introduction](#introduction)
+- [Purpose](#purpose)
+- [Before you start the bot](#before-you-start-the-bot)
+- [Starting the bot](#starting-the-bot)
+- [Commands](#commands)
+- [Setup](#setup)
+- [Known issues](#known-issues)
+- [Future implementations](#future-implementations)
+
 ## Introduction
-
-This project started as a personal project to experiment and test the several functionalities offered by the [python-telegram-bot](https://python-telegram-bot.org/) wrapper.
-
-After thinking about the functionalities I wanted to develop for myself, I thought that it'd have been fun to develop something that many users could use.
-
+This project started as a personal project to experiment and test the several functionalities offered by the [python-telegram-bot](https://python-telegram-bot.org/) wrapper.<br>
+After thinking about the functionalities I wanted to develop for myself, I thought that it'd have been fun to develop something that many users could use.<br>
 So, I started to develop a general purpose bot, to assist the users during their daily tasks, just like a virtual assistant, but without the support of kind of AI.
 
 That's it.
 
 ## Purpose
-
 The purpose of the bot is to provide the user a set of functionalities that it can use to get informed on the local news, or to create a todo, or to get weather information.
 
 The user can interact accomplish these actions thanks to a set of commands, like:
@@ -30,7 +36,8 @@ Therefore, before you start, you need to know that the bot will save the locatio
 That means that, for testing purposes, you don't have to use your _actual_ location, but you can set any nearby location, so you don't have to deal with different time zones if you want to test the `/todo` command features,
 or have a complete different results when using the `/weather` command.
 
-Starting the bot and accepting to share your public Telegram data:
+## Starting the bot
+Once you start the bot, you'll see:
 <div align="left">
     <img src="docs/assets/start.png" width="30%" alt="start_image">
     <img src="docs/assets/start_user_agreement.png" width="30%" alt="start_user_agreement_image">
@@ -38,7 +45,6 @@ Starting the bot and accepting to share your public Telegram data:
 </div>
 
 ## Commands
-
 ### `/help`
 With this command, the user can get help on the various features that the bot provides.<br>
 By typing `/help <command>`, the user receives a specific guide on how to use the command provided.
@@ -48,7 +54,6 @@ By typing `/help <command>`, the user receives a specific guide on how to use th
     <img src="docs/assets/help_news.png" width="30%" alt="help_news_image">
     <img src="docs/assets/help_unknown_command.png" width="30%" alt="help_unknown_command_image">
 </div>
-
 
 ### `/news`
 With this command, the user receives a set of local news based on the user's location.<br>
@@ -125,5 +130,10 @@ Please note that without setting a location, this command is unable to provide t
     <img src="docs/assets/weather.png" width="30%" alt="weather_image">
 </div>
 
+## Setup
 
+## Known issues
 
+## Future implementations
+
+[Go to summary](#summary)
