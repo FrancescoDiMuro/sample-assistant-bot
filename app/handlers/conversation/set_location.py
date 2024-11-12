@@ -224,8 +224,8 @@ async def input_location(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
                     "Now you can explore the functionalities of this bot.\n"
                     "Let me give you a hint:\n"
                     "- press /news to see the latest local news\n"
-                    "- press /todo to create a new to-do"
-                    "- press /todos to see all you saved to-dos"
+                    "- press /todo to create a new to-do\n"
+                    "- press /todos to see all you saved to-dos\n"
                     "- press /weather to check the weather at your location"
                 )
 
