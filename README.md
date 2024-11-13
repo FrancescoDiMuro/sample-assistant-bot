@@ -228,12 +228,13 @@ to start the bot.
 At the moment, the bot doesn't use an async connections to the database through the SQLAlchemy ORM, so there might be issues related to this implementation.
 
 ## Ongoing implementations
-- [x] Create a todo with a message
+- [ ] Create a todo with a message
 
 ## Future implementations
 - [ ] Async connections with the database
 - [ ] Add integration tests
 - [ ] Encrypt user data
 - [ ] Let the user delete its data from the database
+- [ ] Let the user set its location from Telegram Desktop
 
 [Go to summary](#summary)
