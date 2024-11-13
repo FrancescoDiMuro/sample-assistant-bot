@@ -8,6 +8,7 @@
 - [Commands](#commands)
 - [Setup](#setup)
 - [Known issues](#known-issues)
+- [Ongoing implementations](#ongoing-implementations)
 - [Future implementations](#future-implementations)
 
 ## Introduction
@@ -132,8 +133,106 @@ Please note that without setting a location, this command is unable to provide t
 
 ## Setup
 
+In this section, you can find the step-by-step guide on how to run this project on your local machine.
+
+First thing first, clone the repository locally with the command
+
+```cmd
+git clone https://github.com/FrancescoDiMuro/sample-assistant-bot.git
+```
+
+Then, you can proceed in two ways:
+1. [using Docker Compose](#using-docker-compose)
+2. [using the virtual environment](#using-the-virtual-environment)
+
+
+### Using Docker Compose
+Be sure to have Docker Compose installed on your PC.<br>
+Then, once you changed directory to the projet root, all you need to do is execute the command
+
+```cmd
+docker compose --env-file ./app/.env up --detach
+```
+and you're pretty much done.
+
+If you want to remove the app from Docker, together with the app image and the created volume, use the command
+
+```cmd
+docker compose down --rmi local --volumes
+```
+
+### Using the Virtual Environment
+If you don't want or you can't use the Docker Compose solution, you might want to use this one.
+
+First thing first, be sure to have installed [Python](https://www.python.org/downloads/) on your PC.<br>
+This application has been developed with Python 3.12.7, but every version equal or above 3.10 should work fine.
+
+If you want to be sure that you've installed Python correctly, or you want to check if you already have it installed on your PC, use the command
+
+```cmd
+python --version
+```
+
+or
+
+```cmd
+py --version
+```
+
+Once you managed to install/verify that Python is installed on your PC, you need to create a [virtual environment](https://docs.python.org/3/library/venv.html).
+
+Move to the project root, and run the command
+
+```cmd
+python -m venv ./.venv
+```
+
+or, if you have already the `virtualenv` package installed
+
+```cmd
+python -m virtualenv ./.venv
+```
+
+Once the command finishes its execution, you have to activate the _venv_, using the command
+
+```cmd
+./.venv/Scripts/activate
+```
+
+You can verify that the _venv_ has been correctly activated by checking the prefix `(.venv)` before the path in the terminal.
+
+Moving on, you need to install the required packages, executing the command
+
+```cmd
+pip install -r ./app/requirements.txt
+```
+
+Once the command finishes its execution, you completed the application setup, and it's time to setup the database.
+
+This step depends mainly on your preferences, but if you want to make it simple, you can use a local [SQLite](https://www.sqlite.org/index.html) database.
+
+All you need to do is to be sure that you're using the SQLite values for the environment variables in the .env file for the SQLAlchemy section (default).
+
+In case you want to use another database, you can set it up and update the environment variables accordingly (following the [official SQLAlchemy documentation](https://docs.sqlalchemy.org/en/20/dialects/)).
+
+Once you've completed this step, use the command
+```cmd
+python app
+```
+
+to start the bot.
+
 ## Known issues
+### Use of synchronous connections with the database
+At the moment, the bot doesn't use an async connections to the database through the SQLAlchemy ORM, so there might be issues related to this implementation.
+
+## Ongoing implementations
+- [x] Create a todo with a message
 
 ## Future implementations
+- [ ] Async connections with the database
+- [ ] Add integration tests
+- [ ] Encrypt user data
+- [ ] Let the user delete its data from the database
 
 [Go to summary](#summary)
